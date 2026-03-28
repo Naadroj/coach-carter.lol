@@ -1,0 +1,23 @@
+{
+    "default": {
+        "dragon_first_spawn": 300,
+        "dragon_respawn": 300,
+        "elder_respawn": 360,
+        "grubs_first_spawn": 480,
+        "grubs_disappearance": 885,
+        "herald_first_spawn": 900,
+        "herald_disappearance": 1185,
+        "baron_first_spawn": 1200,
+        "baron_respawn": 360
+    },
+    "SWIFTPLAY": {
+        "dragon_first_spawn": 300,
+        "dragon_respawn": 300,
+        "grubs_first_spawn": -1,
+        "grubs_disappearance": -1,
+        "herald_first_spawn": -1,
+        "herald_disappearance": -1,
+        "baron_first_spawn": 720,
+        "baron_respawn": 300
+    }
+}

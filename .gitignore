@@ -1,0 +1,14 @@
+node_modules/
+dist/
+dist-electron/
+frontend/dist/
+backend/__pycache__/
+backend/*.pyc
+backend/**/__pycache__/
+backend/**/*.pyc
+backend/dist/
+backend/.env
+.env
+*.log
+.amokk-local/
+electron/dist/

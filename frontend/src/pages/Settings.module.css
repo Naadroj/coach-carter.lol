@@ -1,0 +1,198 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.header h1 {
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+}
+
+.subtitle {
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table thead tr {
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.table th {
+  padding: 10px 12px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  text-align: left;
+}
+
+.row {
+  border-bottom: 1px solid var(--border-subtle);
+  transition: background 0.1s;
+}
+
+.row:last-child { border-bottom: none; }
+.row:hover { background: var(--bg-hover); }
+.rowDisabled { opacity: 0.45; }
+
+.table td {
+  padding: 12px 12px;
+  vertical-align: middle;
+}
+
+.colName     { width: 50%; }
+.colCooldown { width: 30%; }
+.colToggle   { width: 20%; }
+
+.triggerLabel {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.savedBadge {
+  margin-left: 8px;
+  font-size: 11px;
+  color: var(--success, #22c55e);
+  font-weight: 700;
+}
+
+/* ── Cooldown input ── */
+.cooldownRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.cooldownInput {
+  width: 70px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-size: 13px;
+  padding: 5px 8px;
+  text-align: center;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.cooldownInput:focus { border-color: var(--accent-dim); }
+.cooldownInput:disabled { opacity: 0.4; cursor: not-allowed; }
+.cooldownInput::-webkit-inner-spin-button { display: none; }
+
+.cooldownUnit {
+  font-size: 12px;
+  color: var(--text-muted);
+  min-width: 30px;
+}
+
+/* ── Toggle ── */
+.toggle {
+  width: 44px;
+  height: 24px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+  padding: 3px;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.toggleOn {
+  background: var(--accent);
+  border-color: var(--accent);
+  justify-content: flex-end;
+}
+
+.toggleThumb {
+  width: 16px;
+  height: 16px;
+  background: white;
+  border-radius: 50%;
+  display: block;
+  transition: all 0.2s;
+}
+
+.toggle:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* ── Spawn phases ── */
+.phasesRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+.phaseTag {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  padding: 3px 6px;
+}
+
+.phaseInput {
+  width: 48px;
+  background: transparent;
+  border: none;
+  color: var(--text-primary);
+  font-size: 12px;
+  text-align: center;
+  outline: none;
+}
+.phaseInput::-webkit-inner-spin-button { display: none; }
+.phaseInput:disabled { opacity: 0.4; }
+
+.phaseLabel {
+  font-size: 11px;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.phaseRemove {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 1;
+  padding: 0 2px;
+  opacity: 0.6;
+}
+.phaseRemove:hover { opacity: 1; color: var(--danger, #ef4444); }
+.phaseRemove:disabled { opacity: 0.3; cursor: not-allowed; }
+
+.phaseAdd {
+  font-size: 11px;
+  color: var(--accent);
+  background: none;
+  border: 1px dashed var(--accent-dim);
+  border-radius: var(--radius-sm);
+  padding: 3px 8px;
+  cursor: pointer;
+  opacity: 0.7;
+  transition: opacity 0.15s;
+}
+.phaseAdd:hover { opacity: 1; }
+.phaseAdd:disabled { opacity: 0.3; cursor: not-allowed; }

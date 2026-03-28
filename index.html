@@ -1,0 +1,2964 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Forge — LoL AI Coach</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --gold:#C89B3C;--gold-light:#F0E6A0;--gold-dark:#785A1A;
+  --bg:#0A0A0F;--bg2:#12121A;--bg3:#1A1A26;--bg4:#22223A;
+  --border:rgba(200,155,60,0.2);--border-bright:rgba(200,155,60,0.5);
+  --text:#E8E0CC;--text-muted:#7A7060;--text-mid:#B0A080;
+  --blue:#4B9EFF;--red:#E8524A;--green:#4FC76A;--purple:#A87FE8;
+  --font:'Syne',sans-serif;--mono:'IBM Plex Mono',monospace;
+}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--font)}
+#app{display:flex;flex-direction:column;height:100vh;overflow:hidden}
+header{display:flex;align-items:center;justify-content:space-between;padding:0 24px;padding-right:148px;height:52px;background:var(--bg2);border-bottom:1px solid var(--border);flex-shrink:0;-webkit-app-region:drag}
+.nav-tabs,.status-bar,.btn,button,input,select,textarea{-webkit-app-region:no-drag}
+.logo{display:flex;align-items:center;gap:10px}
+.logo-hex{width:28px;height:28px;background:var(--gold);clip-path:polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%)}
+.logo-text{font-size:15px;font-weight:800;letter-spacing:.08em;color:var(--gold);text-transform:uppercase}
+.logo-sub{font-size:11px;color:var(--text-muted);font-family:var(--mono);margin-left:4px}
+.status-bar{display:flex;align-items:center;gap:10px}
+.status-dot{width:8px;height:8px;border-radius:50%}
+.status-dot.idle{background:var(--text-muted)}
+.status-dot.live{background:var(--green);box-shadow:0 0 8px var(--green);animation:blink 2s infinite}
+.status-dot.draft{background:var(--blue);box-shadow:0 0 8px var(--blue);animation:blink 2s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.4}}
+.status-label{font-size:12px;color:var(--text);font-family:var(--mono)}
+.nav-tabs{display:flex;gap:2px}
+.nav-tab{padding:6px 14px;font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;border-radius:4px;transition:all .15s;color:var(--text-muted);background:transparent;border:none;font-family:var(--font)}
+.nav-tab:hover{color:var(--text);background:var(--bg3)}
+.nav-tab.active{color:var(--gold);background:rgba(200,155,60,0.12)}
+main{flex:1;overflow-y:auto;padding:20px 24px}
+.section{display:none;flex-direction:column;gap:16px}
+.section.active{display:flex}
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:16px}
+.card-title{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--gold);margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.card-title::after{content:'';flex:1;height:1px;background:var(--border)}
+input,select,textarea{background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:8px 12px;color:var(--text);font-family:var(--font);font-size:13px;outline:none;transition:border-color .15s}
+input:focus,select:focus,textarea:focus{border-color:var(--gold)}
+input::placeholder,textarea::placeholder{color:var(--text-muted)}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;border-radius:6px;cursor:pointer;transition:all .15s;border:none;font-family:var(--font)}
+.btn-gold{background:var(--gold);color:var(--bg)}
+.btn-gold:hover{background:var(--gold-light)}
+.btn-ghost{background:transparent;border:1px solid var(--border);color:var(--text-muted)}
+.btn-ghost:hover{border-color:var(--border-bright);color:var(--text);background:var(--bg3)}
+.btn-danger{background:rgba(232,82,74,.15);border:1px solid rgba(232,82,74,.3);color:var(--red)}
+.btn-danger:hover{background:rgba(232,82,74,.25)}
+.btn:disabled{opacity:.35;cursor:not-allowed}
+.spinner{width:14px;height:14px;border:2px solid var(--border);border-top-color:var(--gold);border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start}
+.three-col{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+
+/* Champion grid */
+.champ-search{display:flex;gap:8px;margin-bottom:10px}
+.champ-search input{flex:1}
+.role-filter{display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap}
+.role-btn{padding:4px 10px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;border:1px solid var(--border);border-radius:4px;cursor:pointer;transition:all .15s;background:transparent;color:var(--text-muted);font-family:var(--font)}
+.role-btn:hover,.role-btn.active{background:rgba(200,155,60,.12);border-color:var(--border-bright);color:var(--gold)}
+.champ-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(58px,1fr));gap:5px;max-height:220px;overflow-y:auto}
+.champ-cell{display:flex;flex-direction:column;align-items:center;gap:3px;padding:5px 3px;border-radius:6px;cursor:pointer;transition:all .15s;border:1px solid transparent}
+.champ-cell:hover{background:var(--bg3);border-color:var(--border)}
+.champ-cell.selected{background:rgba(200,155,60,.15);border-color:var(--gold)}
+.champ-cell.unavailable{opacity:.25;pointer-events:none}
+.champ-avatar{width:42px;height:42px;border-radius:5px;background:var(--bg4);overflow:hidden;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:9px;color:var(--text-muted);font-family:var(--mono);text-align:center;line-height:1.2}
+.champ-avatar img{width:100%;height:100%;object-fit:cover}
+.champ-name{font-size:9px;color:var(--text-mid);text-align:center;font-family:var(--mono)}
+
+/* Draft board */
+.draft-layout{display:grid;grid-template-columns:1fr 40px 1fr;gap:10px;align-items:start}
+.draft-team{display:flex;flex-direction:column;gap:5px}
+.team-label{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;margin-bottom:4px}
+.team-label.blue{color:var(--blue)}.team-label.red{color:var(--red)}
+.ban-row{display:flex;gap:3px;margin-bottom:6px}
+.ban-chip{width:30px;height:30px;border-radius:4px;background:var(--bg3);border:1px solid var(--border);overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:9px;color:var(--text-muted);font-family:var(--mono);position:relative}
+.ban-chip.banned{border-color:var(--red);background:rgba(232,82,74,.12)}
+.ban-chip.banned::after{content:'';position:absolute;top:50%;left:50%;width:130%;height:2px;background:var(--red);transform:translate(-50%,-50%) rotate(-45deg)}
+.ban-chip img{width:100%;height:100%;object-fit:cover}
+.pick-slot{display:flex;align-items:center;gap:7px;padding:5px 8px;border-radius:5px;background:var(--bg3);border:1px solid var(--border);min-height:38px;transition:all .15s}
+.pick-slot.filled-blue{background:rgba(75,158,255,.08);border-color:rgba(75,158,255,.3)}
+.pick-slot.filled-red{background:rgba(232,82,74,.08);border-color:rgba(232,82,74,.3)}
+.pick-slot.filled-mine{background:rgba(200,155,60,.12);border-color:var(--border-bright)}
+.slot-thumb{width:26px;height:26px;border-radius:3px;background:var(--bg4);overflow:hidden;flex-shrink:0}
+.slot-thumb img{width:100%;height:100%;object-fit:cover}
+.slot-info{flex:1}.slot-name{font-size:11px;font-weight:500}.slot-role{font-size:9px;color:var(--text-muted);font-family:var(--mono)}
+.badge-me{font-size:9px;font-weight:700;padding:2px 5px;border-radius:3px;background:rgba(200,155,60,.2);color:var(--gold);text-transform:uppercase}
+.draft-center{display:flex;flex-direction:column;align-items:center;gap:6px;padding-top:20px}
+.vs{font-size:9px;font-weight:800;color:var(--text-muted);letter-spacing:.1em}
+
+/* Advice */
+.advice-box{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:14px}
+.advice-header{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.ai-icon{width:20px;height:20px;background:var(--gold);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;color:var(--bg);font-weight:700;flex-shrink:0}
+.advice-label{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--gold)}
+.advice-meta{font-size:10px;font-family:var(--mono);color:var(--text-muted);margin-left:auto}
+.advice-text{font-size:13px;color:var(--text);line-height:1.7}
+.advice-text.muted{color:var(--text-muted);font-style:italic;font-size:12px;font-family:var(--mono)}
+.phase-badge{font-size:9px;font-weight:700;padding:2px 7px;border-radius:3px;text-transform:uppercase;letter-spacing:.08em}
+.phase-badge.p1{background:rgba(75,158,255,.15);color:var(--blue)}
+.phase-badge.p2{background:rgba(200,155,60,.15);color:var(--gold)}
+
+/* Runes */
+.rune-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.rune-path{background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:10px}
+.rune-path-name{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px}
+.rune-path-name.primary{color:var(--gold)}.rune-path-name.secondary{color:var(--purple)}
+.rune-item{font-size:11px;color:var(--text-mid);display:flex;align-items:center;gap:6px;margin-bottom:3px}
+.rune-item::before{content:'◆';font-size:7px;color:var(--gold)}
+.rune-item.keystone{color:var(--text);font-weight:500;font-size:12px}
+.rune-item.keystone::before{content:'◈';font-size:9px;color:var(--gold-light)}
+.spell-chips{display:flex;gap:8px;margin-bottom:10px}
+.spell-chip{display:flex;align-items:center;gap:8px;padding:6px 12px;border-radius:6px;background:var(--bg4);border:1px solid var(--border);font-size:12px}
+.spell-icon{width:24px;height:24px;border-radius:4px;background:var(--bg3);overflow:hidden}
+.spell-icon img{width:100%;height:100%;object-fit:cover}
+
+/* Post game */
+.pm-result{font-size:28px;font-weight:800}
+.pm-result.win{color:var(--green)}.pm-result.loss{color:var(--red)}
+.pm-kda{font-size:13px;font-family:var(--mono);color:var(--text-muted);margin-top:2px}
+.stat-chip{background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:10px;text-align:center}
+.stat-chip .val{font-size:18px;font-weight:700;color:var(--text);font-family:var(--mono)}
+.stat-chip .lbl{font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.08em;margin-top:2px}
+.tl-item{display:flex;align-items:flex-start;gap:10px;padding:9px 0;border-bottom:1px solid var(--border)}
+.tl-item:last-child{border-bottom:none}
+.tl-time{font-size:11px;font-family:var(--mono);color:var(--text-muted);min-width:34px;margin-top:2px}
+.tl-badge{font-size:9px;font-weight:700;padding:2px 6px;border-radius:3px;text-transform:uppercase;letter-spacing:.06em;margin-top:2px;flex-shrink:0}
+.tl-badge.good{background:rgba(79,199,106,.15);color:var(--green)}
+.tl-badge.warn{background:rgba(200,155,60,.15);color:var(--gold)}
+.tl-badge.bad{background:rgba(232,82,74,.15);color:var(--red)}
+.tl-text{font-size:12px;color:var(--text-mid);line-height:1.5}
+.setting-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border)}
+.setting-row:last-child{border-bottom:none}
+.setting-label{font-size:13px}.setting-sub{font-size:11px;color:var(--text-muted);margin-top:2px;font-family:var(--mono)}
+.setting-val{font-size:12px;font-family:var(--mono);color:var(--text-muted)}
+.player-row{display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid var(--border)}
+.player-row:last-child{border-bottom:none}
+.player-avatar{width:28px;height:28px;border-radius:4px;overflow:hidden;flex-shrink:0;background:var(--bg4);border:1px solid var(--border)}
+.player-champ{font-size:11px;font-weight:500;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.player-score{font-size:11px;font-family:var(--mono);color:var(--text-muted);min-width:56px;text-align:right}
+.item-icon{width:18px;height:18px;border-radius:2px;overflow:hidden;flex-shrink:0}
+.item-icon img{width:100%;height:100%;object-fit:cover}
+.ig-stat{text-align:center}
+.ig-stat .val{font-size:18px;font-weight:800;font-family:var(--mono)}
+.ig-stat .lbl{font-size:9px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.08em;margin-top:1px}
+@keyframes notifyGlow{0%{box-shadow:0 0 0 0 rgba(200,155,60,.7);border-color:var(--border)}40%{box-shadow:0 0 0 10px rgba(200,155,60,.15);border-color:var(--gold)}100%{box-shadow:0 0 0 0 rgba(200,155,60,0);border-color:var(--border)}}
+/* Match History */
+.mh-row{display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:5px;border:1px solid var(--border);background:var(--bg3);cursor:pointer;transition:border-color .15s}
+.mh-row:hover{border-color:var(--border-bright)}
+.mh-row.win{border-left:3px solid var(--green)}
+.mh-row.loss{border-left:3px solid var(--red)}
+.mh-champ{width:32px;height:32px;border-radius:4px;overflow:hidden;flex-shrink:0}
+.mh-champ img{width:100%;height:100%;object-fit:cover}
+.mh-badge{font-size:9px;font-weight:800;padding:2px 5px;border-radius:3px;flex-shrink:0}
+.mh-badge.win{background:rgba(82,196,100,.15);color:var(--green)}
+.mh-badge.loss{background:rgba(232,82,74,.12);color:var(--red)}
+.mh-info{flex:1;min-width:0}
+.mh-name{font-size:12px;font-weight:700;color:var(--text)}
+.mh-meta{font-size:10px;color:var(--text-muted);font-family:var(--mono)}
+.mh-kda{font-size:11px;font-family:var(--mono);color:var(--text-mid);text-align:right;flex-shrink:0}
+.mh-analyze{font-size:10px;padding:2px 8px;opacity:0}
+.mh-row:hover .mh-analyze{opacity:1}
+/* TTS */
+.tts-btn{background:none;border:1px solid var(--border);border-radius:4px;padding:2px 8px;font-size:12px;cursor:pointer;color:var(--text-muted);transition:all .2s;line-height:1.5;flex-shrink:0}
+.tts-btn:hover{border-color:var(--gold);color:var(--gold)}
+.tts-btn.speaking{border-color:var(--gold);color:var(--gold);animation:ttsPulse 1s ease-in-out infinite}
+@keyframes ttsPulse{0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(200,155,60,.4)}50%{opacity:.7;box-shadow:0 0 0 4px rgba(200,155,60,.1)}}
+.tts-toggle{position:relative;display:inline-block;width:38px;height:21px;flex-shrink:0}
+.tts-toggle input{opacity:0;width:0;height:0}
+.tts-slider{position:absolute;cursor:pointer;top:0;left:0;right:0;bottom:0;background:var(--bg2);border:1px solid var(--border);border-radius:12px;transition:.3s}
+.tts-slider:before{position:absolute;content:"";height:15px;width:15px;left:2px;bottom:2px;background:var(--text-muted);border-radius:50%;transition:.3s}
+input:checked+.tts-slider{background:rgba(200,155,60,.2);border-color:var(--gold)}
+input:checked+.tts-slider:before{transform:translateX(17px);background:var(--gold)}
+.advice-box.notify{animation:notifyGlow 1.4s ease-out}
+@keyframes tabPing{0%,100%{color:var(--gold)}50%{color:var(--text)}}
+.nav-tab.has-notif{animation:tabPing .8s ease-in-out 4}
+.notif-dot{width:6px;height:6px;background:var(--gold);border-radius:50%;display:inline-block;margin-left:5px;vertical-align:middle;box-shadow:0 0 5px var(--gold)}
+.toast{position:fixed;bottom:24px;right:24px;background:var(--bg2);border:1px solid var(--border-bright);border-radius:8px;padding:12px 16px;font-size:12px;color:var(--text);z-index:9999;transform:translateY(120%);opacity:0;transition:transform .3s cubic-bezier(.34,1.56,.64,1),opacity .25s;max-width:280px;pointer-events:none}
+.toast.show{transform:translateY(0);opacity:1}
+.toast-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--gold);margin-bottom:4px}
+.toast-body{color:var(--text-mid);font-size:11px;line-height:1.5}
+::-webkit-scrollbar{width:4px;height:4px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--bg4);border-radius:4px}
+/* lol-brain full-screen tab */
+main.fullscreen{padding:0!important;overflow:hidden!important}
+#tab-lolbrain{gap:0;height:100%}
+.lb-toolbar{display:flex;align-items:center;gap:4px;padding:5px 10px;background:var(--bg2);border-bottom:1px solid var(--border);flex-shrink:0;flex-wrap:wrap;-webkit-app-region:no-drag}
+.lb-sep{width:1px;height:18px;background:var(--border);margin:0 4px;flex-shrink:0}
+.lb-nav{padding:4px 10px;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;border:1px solid var(--border);border-radius:4px;cursor:pointer;background:transparent;color:var(--text-muted);font-family:var(--font);transition:all .15s}
+.lb-nav:hover,.lb-nav.active{background:rgba(200,155,60,.12);border-color:var(--border-bright);color:var(--gold)}
+.lb-wv-wrap{flex:1;overflow:hidden;min-height:0}
+.lb-wv-wrap webview{width:100%;height:100%;border:none}
+.lb-advice{flex-shrink:0;padding:12px 14px;background:var(--bg2);border-top:1px solid var(--border);max-height:45vh;overflow-y:auto}
+</style>
+</head>
+<body>
+<div id="app">
+  <header>
+    <div class="logo">
+      <div class="logo-hex"></div>
+      <span class="logo-text">Forge</span>
+      <span class="logo-sub">AI Coach</span>
+    </div>
+    <div class="nav-tabs">
+      <button class="nav-tab active" onclick="showTab('lolbrain',this)">lol-brain</button>
+      <button class="nav-tab" id="navIngame" onclick="showTab('ingame',this)">En jeu</button>
+      <button class="nav-tab" onclick="showTab('postgame',this)">Post-game</button>
+      <button class="nav-tab" onclick="showTab('settings',this)">Config</button>
+    </div>
+    <div class="status-bar">
+      <div class="status-dot idle" id="statusDot"></div>
+      <span class="status-label" id="statusLabel">En attente</span>
+    </div>
+  </header>
+
+  <main>
+    <!-- LOL-BRAIN (plein écran) -->
+    <div class="section active" id="tab-lolbrain">
+
+      <!-- Barre d'outils lol-brain -->
+      <div class="lb-toolbar">
+        <!-- Navigation -->
+        <button class="lb-nav" onclick="lolbrainNav('back')" title="Retour">◀</button>
+        <button class="lb-nav" onclick="lolbrainNav('reload')" title="Actualiser">↻</button>
+        <div class="lb-sep"></div>
+        <!-- Sections lol-brain -->
+        <button class="lb-nav active" id="lb-btn-draft" onclick="lolbrainGo('draft',this)">Draft</button>
+        <button class="lb-nav" id="lb-btn-dashboard" onclick="lolbrainGo('dashboard',this)">Dashboard</button>
+        <button class="lb-nav" id="lb-btn-best-time" onclick="lolbrainGo('best-time',this)">Best Time</button>
+        <button class="lb-nav" id="lb-btn-tilt" onclick="lolbrainGo('tilt',this)">Tilt</button>
+        <button class="lb-nav" id="lb-btn-queue" onclick="lolbrainGo('queue',this)">Queue</button>
+        <div class="lb-sep"></div>
+        <!-- Sélecteur de rôle compact -->
+        <span style="font-size:10px;color:var(--text-muted);font-family:var(--mono);">Rôle :</span>
+        <button class="lb-nav active" data-role="TOP" onclick="setMyRole(this)">Top</button>
+        <button class="lb-nav" data-role="JGL" onclick="setMyRole(this)">Jgl</button>
+        <button class="lb-nav" data-role="MID" onclick="setMyRole(this)">Mid</button>
+        <button class="lb-nav" data-role="ADC" onclick="setMyRole(this)">Adc</button>
+        <button class="lb-nav" data-role="SUP" onclick="setMyRole(this)">Sup</button>
+        <div style="flex:1;min-width:8px;"></div>
+        <!-- Statut + bouton Claude -->
+        <span id="lolbrainStatus" style="font-size:10px;font-family:var(--mono);color:var(--text-muted);margin-right:4px;">Chargement…</span>
+        <button class="lb-nav" onclick="lolbrainReSync()" title="Forcer la synchronisation LCU dans lol-brain">↺ Sync</button>
+        <button class="btn btn-gold" style="padding:4px 14px;font-size:11px;margin-left:4px;" onclick="openLbAdvice()" id="lolbrainPickBtn">★ Mon pick idéal</button>
+      </div>
+
+      <!-- Webview plein écran -->
+      <div class="lb-wv-wrap">
+        <webview
+          id="lolbrainWebview"
+          src="https://www.lol-brain.com/draft"
+          partition="persist:lolbrain"
+          allowpopups
+          style="width:100%;height:100%;border:none;"
+        ></webview>
+      </div>
+
+      <!-- Panneau conseil Claude (slide-up, caché par défaut) -->
+      <div class="lb-advice" id="lbAdvicePanel" style="display:none;">
+        <div class="advice-header">
+          <div class="ai-icon">AI</div>
+          <span class="advice-label" id="adviceLabel">Coach</span>
+          <span class="phase-badge" id="advicePhaseBadge" style="display:none;"></span>
+          <span class="advice-meta" id="adviceMeta">—</span>
+          <button class="tts-btn" id="ttsBtnDraft" onclick="ttsSpeak('draft')" title="Lire à voix haute">🔊</button>
+          <button class="btn btn-ghost" style="font-size:10px;padding:2px 8px;margin-left:auto;" onclick="closeLbAdvice()">✕</button>
+        </div>
+
+        <!-- Analyse lol-brain (win%, lanes, counterpicks) -->
+        <div id="lbAnalysisBlock" style="display:none;margin-bottom:12px;border-bottom:1px solid var(--border);padding-bottom:12px;">
+          <!-- Win probability -->
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+            <div style="font-size:10px;font-family:var(--mono);color:var(--text-muted);white-space:nowrap;">BLUE</div>
+            <div style="flex:1;height:8px;background:var(--bg4);border-radius:4px;overflow:hidden;position:relative;">
+              <div id="lbWinBar" style="height:100%;background:linear-gradient(90deg,#4a90d9,#7c5cbf);border-radius:4px;transition:width .6s ease;"></div>
+            </div>
+            <div style="font-size:10px;font-family:var(--mono);color:var(--text-muted);white-space:nowrap;">RED</div>
+          </div>
+          <div id="lbWinLabel" style="text-align:center;font-size:11px;font-weight:700;color:var(--gold);margin-bottom:8px;font-family:var(--mono);"></div>
+          <div id="lbVerdict" style="text-align:center;font-size:10px;color:var(--text-muted);margin-bottom:10px;"></div>
+          <!-- Lane matchups -->
+          <div id="lbLanes" style="display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin-bottom:10px;"></div>
+          <!-- Counterpicks lol-brain -->
+          <div id="lbCounterpicks" style="font-size:11px;color:var(--text);line-height:1.7;"></div>
+        </div>
+
+        <div class="advice-text muted" id="draftAdvice" style="margin-top:8px;">Lance LoL — l'analyse démarre automatiquement en draft...</div>
+
+        <!-- Runes & Spells (caché jusqu'à l'analyse) -->
+        <div id="runeSpellSection" style="display:none;margin-top:12px;" class="two-col">
+          <div class="card" style="padding:10px;">
+            <div class="card-title">Runes recommandées</div>
+            <div class="rune-grid" id="runesDisplay"></div>
+          </div>
+          <div class="card" style="padding:10px;">
+            <div class="card-title">Summoner spells</div>
+            <div id="spellsDisplay"></div>
+            <div style="margin-top:10px;">
+              <div class="card-title">Early game</div>
+              <div id="earlyTips" style="font-size:12px;color:var(--text-mid);line-height:1.7;"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Éléments fantômes nécessaires au JS (hors affichage) -->
+      <div style="display:none;" aria-hidden="true">
+        <button id="analyzeBtn"></button>
+        <div id="blueBans"></div><div id="redBans"></div>
+        <div id="bluePicks"></div><div id="redPicks"></div>
+        <div id="myChampDisplay"></div>
+        <div id="champGrid"></div>
+        <input id="champSearch" />
+        <div id="filterRoles"></div>
+        <div id="btnAlly"></div><div id="btnEnemy"></div>
+        <div id="btnBan"></div><div id="btnMine"></div>
+      </div>
+    </div>
+
+    <!-- EN JEU -->
+    <div class="section" id="tab-ingame">
+      <div class="card" style="padding:12px 16px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+          <div style="display:flex;align-items:center;gap:20px;">
+            <div class="ig-stat"><div class="val" id="igTimer" style="color:var(--text);">--:--</div><div class="lbl">Temps</div></div>
+            <div class="ig-stat"><div class="val" id="igKda">—</div><div class="lbl">KDA</div></div>
+            <div class="ig-stat"><div class="val" id="igCs">—</div><div class="lbl">CS</div></div>
+            <div class="ig-stat"><div class="val" id="igGold" style="color:var(--gold);">—</div><div class="lbl">Or</div></div>
+            <div class="ig-stat"><div class="val" id="igLevel">—</div><div class="lbl">Niveau</div></div>
+          </div>
+          <button class="btn btn-gold" onclick="manualIngameAnalysis()">Analyser maintenant</button>
+        </div>
+        <div id="igItems" style="display:flex;gap:4px;margin-top:10px;flex-wrap:wrap;"></div>
+      </div>
+
+      <div class="two-col">
+        <div class="card">
+          <div class="card-title">Mon équipe</div>
+          <div id="igAllies"><div style="font-size:12px;color:var(--text-muted);font-family:var(--mono);">En attente de partie...</div></div>
+        </div>
+        <div class="card">
+          <div class="card-title">Équipe ennemie</div>
+          <div id="igEnemies"><div style="font-size:12px;color:var(--text-muted);font-family:var(--mono);">En attente de partie...</div></div>
+        </div>
+      </div>
+
+      <div class="advice-box">
+        <div class="advice-header">
+          <div class="ai-icon">AI</div>
+          <span class="advice-label">Coach en direct</span>
+          <span class="phase-badge" id="igTriggerBadge" style="display:none;"></span>
+          <button class="tts-btn" id="ttsBtnIngame" onclick="ttsSpeak('ingame')" title="Lire à voix haute">🔊</button>
+          <span class="advice-meta" id="igAdviceMeta">—</span>
+        </div>
+        <div class="advice-text muted" id="igAdvice">Lance une partie — l'analyse démarre automatiquement...</div>
+      </div>
+
+      <!-- Début de partie : starters + early laning -->
+      <div class="card" id="igEarlyCard" style="display:none;">
+        <div class="advice-header" style="margin-bottom:10px;">
+          <div class="ai-icon" style="background:var(--gold);color:var(--bg);font-size:10px;font-weight:900;">0:00</div>
+          <span class="advice-label" style="color:var(--gold);">Début de partie</span>
+          <span class="advice-meta" id="igEarlyMeta">Génération…</span>
+          <button class="btn btn-ghost" style="font-size:10px;padding:2px 8px;" onclick="triggerEarlyAdvice(true)" title="Regénérer">↻</button>
+        </div>
+        <div id="igEarlyStarters" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;"></div>
+        <div id="igEarlyTips" style="font-size:12px;color:var(--text);line-height:1.7;"></div>
+      </div>
+
+      <!-- Itemisation en direct -->
+      <div class="card" id="igItemCard" style="display:none;">
+        <div class="advice-header" style="margin-bottom:10px;">
+          <div class="ai-icon" style="background:var(--blue);">🛒</div>
+          <span class="advice-label" style="color:var(--blue);">Itemisation recommandée</span>
+          <span class="advice-meta" id="igItemMeta">—</span>
+          <button class="btn btn-ghost" style="font-size:10px;padding:2px 8px;" onclick="manualItemAnalysis()">↻</button>
+        </div>
+        <div id="igItemSuggestions" style="display:flex;flex-direction:column;gap:6px;"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Événements</div>
+        <div id="igEvents" style="max-height:220px;overflow-y:auto;"></div>
+      </div>
+
+      <div class="card" id="igHistoryCard" style="display:none;">
+        <div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;margin-bottom:6px;" onclick="toggleIngameHistory()">
+          <span class="card-title" style="margin:0;">Historique analyses <span id="igHistoryBadge" class="phase-badge p1" style="display:none;"></span></span>
+          <span id="igHistoryChevron" style="font-size:10px;color:var(--text-muted);">▼</span>
+        </div>
+        <div id="igHistoryList" style="max-height:360px;overflow-y:auto;display:flex;flex-direction:column;gap:8px;"></div>
+      </div>
+    </div>
+
+    <!-- POST GAME -->
+    <div class="section" id="tab-postgame">
+
+      <!-- Historique des 20 dernières parties -->
+      <div class="card" id="matchHistoryCard">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+          <div class="card-title" style="margin:0;">20 dernières parties</div>
+          <div style="display:flex;gap:6px;align-items:center;">
+            <span class="setting-val" id="matchHistoryStatus" style="font-size:10px;">—</span>
+            <button class="btn btn-ghost" style="font-size:11px;padding:3px 10px;" onclick="refreshMatchHistory()">↻</button>
+          </div>
+        </div>
+        <div id="matchHistoryList" style="display:flex;flex-direction:column;gap:3px;">
+          <div style="font-size:12px;color:var(--text-muted);font-family:var(--mono);padding:8px 0;">Client LoL requis — lance le jeu puis clique sur ↻</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Données de fin de partie</div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;margin-bottom:12px;">
+          <div>
+            <label style="font-size:10px;color:var(--text-muted);font-family:var(--mono);display:block;margin-bottom:4px;">CHAMPION</label>
+            <input type="text" id="pgChamp" placeholder="ex: Garen" style="width:100%;" />
+          </div>
+          <div>
+            <label style="font-size:10px;color:var(--text-muted);font-family:var(--mono);display:block;margin-bottom:4px;">KDA</label>
+            <input type="text" id="pgKda" placeholder="5/2/8" style="width:100%;" />
+          </div>
+          <div>
+            <label style="font-size:10px;color:var(--text-muted);font-family:var(--mono);display:block;margin-bottom:4px;">CS TOTAL</label>
+            <input type="number" id="pgCs" placeholder="180" style="width:100%;" />
+          </div>
+          <div>
+            <label style="font-size:10px;color:var(--text-muted);font-family:var(--mono);display:block;margin-bottom:4px;">DURÉE (min)</label>
+            <input type="number" id="pgDuration" placeholder="32" style="width:100%;" />
+          </div>
+          <div>
+            <label style="font-size:10px;color:var(--text-muted);font-family:var(--mono);display:block;margin-bottom:4px;">RÉSULTAT</label>
+            <select id="pgResult" style="width:100%;">
+              <option value="win">Victoire</option>
+              <option value="loss">Défaite</option>
+            </select>
+          </div>
+        </div>
+        <div style="margin-bottom:10px;">
+          <label style="font-size:10px;color:var(--text-muted);font-family:var(--mono);display:block;margin-bottom:4px;">ITEMS FINAUX</label>
+          <input type="text" id="pgItems" placeholder="Triforce, Sterak, Black Cleaver, Plated Steelcaps..." style="width:100%;" />
+        </div>
+        <div style="margin-bottom:14px;">
+          <label style="font-size:10px;color:var(--text-muted);font-family:var(--mono);display:block;margin-bottom:4px;">NOTES PERSONNELLES</label>
+          <textarea id="pgNotes" placeholder="J'ai perdu ma lane, build trop défensif..." style="width:100%;height:64px;resize:vertical;"></textarea>
+        </div>
+        <button class="btn btn-gold" onclick="analyzePostGame()" id="pgBtn">Analyser la partie ↗</button>
+      </div>
+
+      <!-- Historique des debriefs sauvegardés -->
+      <div class="card" id="pgDebriefHistoryCard" style="display:none;">
+        <div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;" onclick="toggleDebriefHistory()">
+          <span class="card-title" style="margin:0;">Historique debriefs <span id="pgDebriefBadge" class="phase-badge p1"></span></span>
+          <span id="pgDebriefChevron" style="font-size:10px;color:var(--text-muted);">▶</span>
+        </div>
+        <div id="pgDebriefHistoryList" style="display:none;margin-top:12px;display:none;flex-direction:column;gap:8px;"></div>
+      </div>
+
+      <div id="pgResultCard" style="display:none;" class="card">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:12px;">
+          <div>
+            <div class="pm-result" id="pgResultLabel">—</div>
+            <div class="pm-kda" id="pgKdaDisplay">—</div>
+          </div>
+          <div class="three-col" style="flex:1;min-width:200px;margin-left:12px;">
+            <div class="stat-chip"><div class="val" id="pgCsMin">—</div><div class="lbl">CS/min</div></div>
+            <div class="stat-chip"><div class="val" id="pgKdaRatio">—</div><div class="lbl">KDA ratio</div></div>
+            <div class="stat-chip"><div class="val" id="pgDurationLabel">—</div><div class="lbl">Durée</div></div>
+          </div>
+        </div>
+        <div class="card-title">Analyse détaillée</div>
+        <div class="advice-text muted" id="pgAnalysis">Chargement...</div>
+        <div style="margin-top:16px;">
+          <div class="card-title">Points d'amélioration</div>
+          <div id="pgTimeline"></div>
+        </div>
+      </div>
+
+      <div class="card" id="pgHistoryCard">
+        <div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;" onclick="toggleDebriefsHistory()">
+          <span class="card-title" style="margin:0;">Historique des parties <span id="pgHistoryBadge" class="phase-badge p2" style="display:none;"></span></span>
+          <span id="pgHistoryChevron" style="font-size:10px;color:var(--text-muted);">▼</span>
+        </div>
+        <div id="pgHistoryList" style="margin-top:8px;max-height:420px;overflow-y:auto;display:none;flex-direction:column;gap:8px;"></div>
+      </div>
+    </div>
+
+    <!-- SETTINGS -->
+    <div class="section" id="tab-settings">
+      <div class="card">
+        <div class="card-title">Profil joueur</div>
+        <div class="setting-row">
+          <div>
+            <div class="setting-label">Champions les plus joués</div>
+            <div class="setting-sub" id="opggProfileSummary" style="color:var(--text-mid);">Calculé automatiquement depuis l'historique LCU</div>
+          </div>
+          <span class="setting-val" id="opggStatus" style="text-align:right;max-width:300px;">—</span>
+        </div>
+        <div style="margin-top:4px;padding:8px 10px;border-radius:5px;background:rgba(75,158,255,.08);border:1px solid rgba(75,158,255,.2);font-size:11px;color:var(--blue);font-family:var(--mono);">
+          Stats calculées depuis tes 20 dernières parties — aucun service externe requis
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">League Client (Draft)</div>
+        <div class="setting-row">
+          <div><div class="setting-label">Statut</div><div class="setting-sub">Détection automatique du champion select</div></div>
+          <span class="setting-val" id="lcuStatus">Initialisation...</span>
+        </div>
+        <div class="setting-row">
+          <div><div class="setting-label">Chemin lockfile (optionnel)</div><div class="setting-sub">Laisser vide pour auto-détection</div></div>
+          <input type="text" id="lockfilePath" placeholder="C:\Riot Games\...\lockfile" style="width:260px;padding:4px 8px;font-size:11px;font-family:var(--mono);" />
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Riot Live Client API</div>
+        <div class="setting-row">
+          <div><div class="setting-label">Endpoint local</div><div class="setting-sub">127.0.0.1:2999/liveclientdata/allgamedata</div></div>
+          <button class="btn btn-ghost" onclick="testLiveAPI()">Tester</button>
+        </div>
+        <div class="setting-row">
+          <div><div class="setting-label">Polling (détection auto)</div><div class="setting-sub">Toutes les 5 secondes</div></div>
+          <span class="setting-val" id="pollingStatus">Inactif</span>
+        </div>
+        <div class="setting-row">
+          <div><div class="setting-label">Statut connexion</div></div>
+          <span class="setting-val" id="apiStatus">Non testé</span>
+        </div>
+        <div class="setting-row">
+          <div><div class="setting-label">Timer de jeu</div></div>
+          <span class="setting-val" id="gameTimer">--:--</span>
+        </div>
+        <div style="margin-top:4px;padding:8px 10px;border-radius:5px;background:rgba(200,155,60,.08);border:1px solid rgba(200,155,60,.2);font-size:11px;color:var(--gold);font-family:var(--mono);">
+          ⚠ Le polling Riot nécessite l'app Electron (pas le navigateur)
+        </div>
+        <div style="margin-top:12px;display:flex;gap:8px;">
+          <button class="btn btn-gold" onclick="startPolling()">Démarrer polling</button>
+          <button class="btn btn-ghost" onclick="stopPolling()">Arrêter</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Clé API Anthropic</div>
+        <div class="setting-row">
+          <div><div class="setting-label">ANTHROPIC_API_KEY</div><div class="setting-sub">Stockée localement, jamais envoyée ailleurs</div></div>
+          <div style="display:flex;gap:6px;align-items:center;">
+            <input type="password" id="apiKeyInput" placeholder="sk-ant-..." style="width:220px;padding:4px 8px;font-size:12px;font-family:var(--mono);" />
+            <button class="btn btn-gold" onclick="saveApiKey()">Sauver</button>
+          </div>
+        </div>
+        <div id="apiKeySaved" style="font-size:11px;color:var(--green);font-family:var(--mono);display:none;margin-top:4px;">✓ Clé enregistrée</div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Préférences</div>
+        <div class="setting-row">
+          <div><div class="setting-label">Région</div></div>
+          <select id="regionSelect" style="padding:4px 8px;font-size:12px;">
+            <option>EUW</option><option>EUNE</option><option>NA</option><option>KR</option>
+          </select>
+        </div>
+        <div class="setting-row">
+          <div><div class="setting-label">Summoner name</div></div>
+          <input type="text" id="summonerName" placeholder="NomInGame#EUW" style="width:160px;padding:4px 8px;font-size:12px;" />
+        </div>
+        <div class="setting-row">
+          <div><div class="setting-label">Mon pool de champions</div><div class="setting-sub">Utilisé pour les recommandations auto en draft</div></div>
+          <input type="text" id="champPool" placeholder="Garen, Darius, Sett..." style="width:220px;padding:4px 8px;font-size:12px;" />
+        </div>
+        <div class="setting-row">
+          <div><div class="setting-label">Data Dragon version</div></div>
+          <span class="setting-val" id="ddVersionDisplay">Chargement...</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">🔊 Lecture audio (TTS)</div>
+        <div class="setting-row">
+          <div><div class="setting-label">Lecture automatique</div><div class="setting-sub">Lire les conseils IA à voix haute après chaque analyse</div></div>
+          <label class="tts-toggle"><input type="checkbox" id="ttsAutoRead" onchange="saveTtsSettings()"><span class="tts-slider"></span></label>
+        </div>
+        <div class="setting-row">
+          <div><div class="setting-label">Voix</div><div class="setting-sub" id="ttsVoiceCount"></div></div>
+          <select id="ttsVoiceSelect" style="width:220px;padding:4px 8px;font-size:11px;font-family:var(--mono);" onchange="saveTtsSettings()"><option>Chargement...</option></select>
+        </div>
+        <div class="setting-row">
+          <div><div class="setting-label">Vitesse — <span id="ttsRateDisplay">1.0×</span></div></div>
+          <input type="range" id="ttsRateInput" min="0.5" max="2.0" step="0.1" value="1.0" style="width:140px;accent-color:var(--gold);" oninput="document.getElementById('ttsRateDisplay').textContent=parseFloat(this.value).toFixed(1)+'×';saveTtsSettings()">
+        </div>
+        <div class="setting-row">
+          <div><div class="setting-label">Résumé uniquement</div><div class="setting-sub">Ne lire que les 3 premières phrases</div></div>
+          <label class="tts-toggle"><input type="checkbox" id="ttsSummaryOnly" onchange="saveTtsSettings()"><span class="tts-slider"></span></label>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:10px;">
+          <button class="btn btn-gold" id="ttsTestBtn" onclick="ttsTest()">🔊 Tester la voix</button>
+          <button class="btn btn-ghost" onclick="ttsStop()">⏹ Stop</button>
+        </div>
+      </div>
+
+      <div class="card" style="border-color:var(--border-bright);">
+        <div class="card-title">Architecture</div>
+        <div style="font-size:12px;color:var(--text-mid);line-height:1.9;font-family:var(--mono);">
+          <div>📡 Live Client API → <span style="color:var(--gold)">127.0.0.1:2999</span> (pendant la partie)</div>
+          <div>🐉 Data Dragon CDN → <span style="color:var(--gold)">ddragon.leagueoflegends.com</span></div>
+          <div>🧠 Claude Sonnet API → <span style="color:var(--gold)">api.anthropic.com</span></div>
+          <div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border);color:var(--text-muted);">Note Electron : désactiver la vérif. SSL pour localhost</div>
+          <div style="color:var(--text-muted);">app.commandLine.appendSwitch('ignore-certificate-errors')</div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+<div class="toast" id="toast">
+  <div class="toast-title" id="toastTitle"></div>
+  <div class="toast-body" id="toastBody"></div>
+</div>
+
+<script>
+const DD = 'https://ddragon.leagueoflegends.com';
+let ddVersion = '14.10.1';
+let allChamps = [], filteredChamps = [];
+let selectedChamp = null;
+let myRole = 'TOP';
+let draft = { blueBans:[], redBans:[], bluePicks:Array(5).fill(null), redPicks:Array(5).fill(null), myPick:null };
+let pollingTimer = null;
+
+const ROLES = {
+  TOP:['Garen','Darius','Fiora','Camille','Malphite','Sett','Renekton','Aatrox','Jax','Nasus','Teemo','Ornn','Illaoi','Irelia','Jayce','Riven','Tryndamere','Vladimir','Yorick','Warwick'],
+  JGL:['Vi','Hecarim','Lee Sin','Jarvan IV','Amumu','Warwick','Nocturne','Graves','Kindred','Nidalee','Evelynn','Kayn','Rengar','Elise','Zac','Sejuani','Fiddlesticks','Viego','Lillia','Poppy'],
+  MID:['Ahri','Syndra','Viktor','Zed','Yasuo','Yone','LeBlanc','Orianna','Akali','Lissandra','Fizz','Kassadin','Vex','Veigar','Lux','Annie','Diana','Galio','Katarina','Malzahar','Ryze','Sylas','Zoe'],
+  ADC:['Jinx','Caitlyn','Jhin','Miss Fortune','Kai\'Sa','Tristana','Ashe','Sivir','Xayah','Vayne','Aphelios','Ezreal','Draven','Lucian','Samira','Twitch','Varus','Zeri','Kog\'Maw'],
+  SUP:['Thresh','Lulu','Nautilus','Leona','Soraka','Janna','Blitzcrank','Morgana','Yuumi','Zilean','Nami','Bard','Pyke','Senna','Rell','Sona','Seraphine','Karma','Alistar']
+};
+
+let champById = {}; // championId (number) → champ object
+let itemNamesFr = {};
+
+function getItemName(itemId) {
+  return itemNamesFr[String(itemId)] || `Item ${itemId}`;
+}
+
+async function init() {
+  try {
+    const r = await fetch(`${DD}/api/versions.json`);
+    const v = await r.json();
+    ddVersion = v[0];
+    document.getElementById('ddVersionDisplay').textContent = ddVersion;
+    const d = await fetch(`${DD}/cdn/${ddVersion}/data/fr_FR/champion.json`).then(r=>r.json());
+    allChamps = Object.values(d.data).map(c=>({id:c.id,name:c.name,img:`${DD}/cdn/${ddVersion}/img/champion/${c.id}.png`,tags:c.tags,key:parseInt(c.key)}));
+    allChamps.forEach(c => { champById[c.key] = c; });
+    renderGrid(allChamps);
+    // Items FR
+    try {
+      const itemR = await fetch(`${DD}/cdn/${ddVersion}/data/fr_FR/item.json`);
+      const itemData = await itemR.json();
+      Object.entries(itemData.data).forEach(([id, it]) => { itemNamesFr[id] = it.name; });
+    } catch {}
+  } catch {
+    document.getElementById('ddVersionDisplay').textContent = ddVersion+' (fallback)';
+    const names = ['Garen','Darius','Ahri','Jinx','Thresh','Lee Sin','Vi','Camille','Syndra','Caitlyn','Teemo','Yasuo','Zed','LeBlanc','Lulu','Nautilus','Jhin','Aatrox','Hecarim','Vayne','Leona','Orianna','Jax','Nasus','Blitzcrank','Graves','Miss Fortune','Elise','Morgana','Warwick'];
+    allChamps = names.map(n=>({id:n.replace(/[^a-zA-Z]/g,''),name:n,img:`${DD}/cdn/${ddVersion}/img/champion/${n.replace(/[^a-zA-Z]/g,'').replace("'","")}.png`,tags:[]}));
+    renderGrid(allChamps);
+  }
+  // Restaurer les préférences
+  const savedName   = localStorage.getItem('summonerName') || 'xXFANDEMOULEXx#GLAND';
+  const savedRegion = localStorage.getItem('region')       || 'EUW';
+  const savedPool   = localStorage.getItem('champPool')    || '';
+  document.getElementById('summonerName').value  = savedName;
+  document.getElementById('regionSelect').value  = savedRegion;
+  document.getElementById('champPool').value     = savedPool;
+
+  // Sauvegarder à chaque changement
+  document.getElementById('summonerName').addEventListener('change', () =>
+    localStorage.setItem('summonerName', document.getElementById('summonerName').value.trim()));
+  document.getElementById('regionSelect').addEventListener('change', () =>
+    localStorage.setItem('region', document.getElementById('regionSelect').value));
+  document.getElementById('champPool').addEventListener('change', () =>
+    localStorage.setItem('champPool', document.getElementById('champPool').value.trim()));
+
+  if (IS_ELECTRON) {
+    startLCUPolling();
+    startGamePolling();
+  }
+}
+
+function startLCUPolling() {
+  const customPath = document.getElementById('lockfilePath')?.value.trim() || undefined;
+  window.electronAPI.onLCUData(handleLCUData);
+  window.electronAPI.startLCUPolling(customPath);
+}
+
+let lcuStatusPhase = null;
+let lcuState = { active: false, myLocked: false, allLocked: false, lastEnemyCount: -1, lastAllyCount: -1, lastBanCount: -1, phase2Done: false };
+let autoAnalysisTimeout = null;
+
+function handleLCUData(payload) {
+  const dot = document.getElementById('statusDot');
+  const label = document.getElementById('statusLabel');
+  const lcuStatus = document.getElementById('lcuStatus');
+
+  if (!payload.ok) {
+    if (lcuStatusPhase !== 'idle') {
+      dot.className = 'status-dot idle';
+      label.textContent = 'Client non détecté';
+      if (lcuStatus) lcuStatus.textContent = 'Client non lancé';
+      lcuStatusPhase = 'idle';
+    }
+    if (lcuState.active) lcuState = { active: false, myLocked: false, allLocked: false, lastEnemyCount: -1, phase2Done: false };
+    return;
+  }
+
+  if (!payload.inChampSelect) {
+    if (lcuStatusPhase !== 'lobby') {
+      dot.className = 'status-dot idle';
+      label.textContent = 'En attente de draft';
+      if (lcuStatus) lcuStatus.textContent = 'En lobby';
+      lcuStatusPhase = 'lobby';
+      // Charger l'historique des parties dès que le client est détecté
+      if (!matchHistory.length) refreshMatchHistory();
+    }
+    if (lcuState.active) lcuState = { active: false, myLocked: false, allLocked: false, lastEnemyCount: -1, lastAllyCount: -1, lastBanCount: -1, phase2Done: false };
+    return;
+  }
+
+  // Nouvelle session de champion select
+  if (!lcuState.active) {
+    lcuState = { active: true, myLocked: false, allLocked: false, lastEnemyCount: -1, lastAllyCount: -1, lastBanCount: -1, phase2Done: false };
+    resetDraft();
+  }
+
+  if (lcuStatusPhase !== 'champselect') {
+    dot.className = 'status-dot draft';
+    label.textContent = 'Draft en cours';
+    if (lcuStatus) lcuStatus.textContent = 'Champion Select';
+    lcuStatusPhase = 'champselect';
+  }
+
+  syncDraftFromLCU(payload.session);
+}
+
+function syncDraftFromLCU(session) {
+  const newDraft = {
+    blueBans: [], redBans: [],
+    bluePicks: Array(5).fill(null), redPicks: Array(5).fill(null),
+    myPick: draft.myPick
+  };
+
+  // Bans — double source : session.bans ET session.actions (plus fiable)
+  const blueBanIds = new Set();
+  const redBanIds  = new Set();
+
+  // Source 1 : champs myTeamBans / theirTeamBans (bans finalisés)
+  (session.bans?.myTeamBans   || []).forEach(id => { if (id > 0) blueBanIds.add(id); });
+  (session.bans?.theirTeamBans || []).forEach(id => { if (id > 0) redBanIds.add(id);  });
+
+  // Source 2 : actions (capte aussi les bans en cours de sélection)
+  (session.actions || []).flat().forEach(action => {
+    if (action.type === 'ban' && action.championId > 0) {
+      if (action.isAllyAction) blueBanIds.add(action.championId);
+      else                     redBanIds.add(action.championId);
+    }
+  });
+
+  blueBanIds.forEach(id => { const c = champById[id]; if (c) newDraft.blueBans.push(c); });
+  redBanIds.forEach(id  => { const c = champById[id]; if (c) newDraft.redBans.push(c);  });
+
+  // Picks équipe bleue (myTeam)
+  session.myTeam?.forEach((slot, i) => {
+    if (slot.championId && champById[slot.championId]) {
+      const champ = champById[slot.championId];
+      newDraft.bluePicks[i] = champ;
+      if (slot.cellId === session.localPlayerCellId) {
+        newDraft.myPick = champ;
+        const role = lcuRoleMap[slot.assignedPosition] || myRole;
+        if (role !== myRole) {
+          myRole = role;
+          document.querySelectorAll('[data-role]').forEach(b => {
+            b.classList.toggle('active', b.dataset.role === myRole);
+          });
+        }
+      }
+    }
+  });
+
+  // Picks équipe rouge (theirTeam)
+  session.theirTeam?.forEach((slot, i) => {
+    if (slot.championId && champById[slot.championId]) {
+      newDraft.redPicks[i] = champById[slot.championId];
+    }
+  });
+
+  draft = newDraft;
+
+  if (draft.myPick) {
+    document.getElementById('myChampDisplay').innerHTML = `
+      <div class="pick-slot filled-mine">
+        <div class="slot-thumb">${champAvatar(draft.myPick.name,'sm')}</div>
+        <div class="slot-info"><div class="slot-name">${draft.myPick.name}</div><div class="slot-role">${myRole}</div></div>
+        <span class="badge-me">Moi</span>
+      </div>`;
+  }
+
+  renderBoard();
+
+  // Détection des phases d'analyse auto
+  const enemyCount = draft.redPicks.filter(Boolean).length;
+  const allyCount = draft.bluePicks.filter(Boolean).filter(c => !draft.myPick || c.name !== draft.myPick.name).length;
+  const banCount = draft.blueBans.length + draft.redBans.length;
+  const myLocked = !!draft.myPick;
+  const allLocked = draft.bluePicks.filter(Boolean).length === 5 && draft.redPicks.filter(Boolean).length === 5;
+
+  // Mise à jour des compteurs uniquement (pas d'analyse auto — tout est manuel via ★ Mon pick idéal)
+  lcuState.lastEnemyCount = enemyCount;
+  lcuState.lastAllyCount  = allyCount;
+  lcuState.lastBanCount   = banCount;
+
+  lcuState.myLocked = myLocked;
+  lcuState.allLocked = allLocked;
+
+  // Injection automatique vers lol-brain.com
+  lbInjectDiff(draft);
+}
+
+function scheduleAutoAnalysis(type) {
+  clearTimeout(autoAnalysisTimeout);
+  autoAnalysisTimeout = setTimeout(() => {
+    if (type === 'champion') analyzeChampionPick();
+    else if (type === 'runes') analyzeRunesForPick();
+  }, 2500);
+}
+
+function setAdvicePhase(phase, label) {
+  const badge = document.getElementById('advicePhaseBadge');
+  badge.textContent = `Phase ${phase}`;
+  badge.className = `phase-badge p${phase}`;
+  badge.style.display = '';
+  document.getElementById('adviceLabel').textContent = label;
+  document.getElementById('adviceMeta').textContent = new Date().toLocaleTimeString();
+}
+
+async function analyzeChampionPick() {
+  const allies = draft.bluePicks.filter(Boolean).map(c => c.name);
+  const enemies = draft.redPicks.filter(Boolean).map(c => c.name);
+  const bans = [...draft.blueBans, ...draft.redBans].filter(Boolean).map(c => c.name);
+  const bannedNames = new Set([...draft.blueBans, ...draft.redBans].filter(Boolean).map(c => c.name));
+  const manualPool = document.getElementById('champPool')?.value.trim();
+  const filteredStats = playerChampStats?.filter(c => !bannedNames.has(c.name));
+  const opggPool = playerStatsToPrompt(filteredStats, myRole);
+  const pool = manualPool || (filteredStats?.slice(0,5).map(c=>c.name).join(', ')) || 'non renseigné';
+
+  setAdvicePhase(1, 'Recommandation de pick');
+  document.getElementById('draftAdvice').className = 'advice-text muted';
+  document.getElementById('draftAdvice').textContent = 'Récupération des données OP.GG...';
+  document.getElementById('runeSpellSection').style.display = 'none';
+
+  // Fetch OP.GG tier list
+  let opggContext = '';
+  if (IS_ELECTRON) {
+    setOpggStatus('Chargement...', null);
+    const tierData = await window.electronAPI.opggTier(myRole);
+    const tierText = formatOpggTier(tierData, myRole);
+    if (tierText) {
+      opggContext = '\n\n' + tierText;
+      setOpggStatus('✓ Données fraîches', true);
+    } else {
+      setOpggStatus('Non disponible', false);
+    }
+  }
+
+  document.getElementById('draftAdvice').textContent = 'Analyse en cours...';
+
+  try {
+    const text = await claudeComplete(
+      `Tu es un coach League of Legends Diamond+. Le joueur n'a pas encore choisi son champion.\n\n` +
+      `**Rôle**: ${myRole}\n` +
+      `**Pool manuel**: ${manualPool || 'non renseigné'}\n` +
+      (opggPool ? opggPool + '\n' : '') +
+      `**Alliés déjà lockés**: ${allies.join(', ') || 'aucun'}\n` +
+      `**Équipe ennemie**: ${enemies.join(', ') || 'aucune info pour l\'instant'}\n` +
+      `**Bans**: ${bans.join(', ') || 'aucun'}` +
+      opggContext + '\n\n' +
+      `Recommande les 3 meilleurs champions à jouer. Priorise les champions du pool du joueur quand c\'est viable. ` +
+      `Pour chacun : win rate OP.GG si connu, synergie avec les alliés, contre-pick ennemi, tier méta actuel. ` +
+      `Sois direct. Réponds en français.`
+    );
+    const draftHtml = text.replace(/\n/g,'<br>').replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>');
+    document.getElementById('draftAdvice').className = 'advice-text';
+    document.getElementById('draftAdvice').innerHTML = draftHtml;
+    notifyAdvice('lolbrain', '#lbAdvicePanel', 'Recommandation de pick', text);
+    ttsAutoSpeak('draft', text);
+  } catch(e) {
+    document.getElementById('draftAdvice').className = 'advice-text muted';
+    document.getElementById('draftAdvice').textContent = 'Erreur : ' + (e?.message || e);
+  }
+}
+
+async function analyzeRunesForPick() {
+  if (!draft.myPick) return;
+  const allies = draft.bluePicks.filter(Boolean).map(c => c.name);
+  const enemies = draft.redPicks.filter(Boolean).map(c => c.name);
+  const bans = [...draft.blueBans, ...draft.redBans].filter(Boolean).map(c => c.name);
+  const my = draft.myPick.name;
+  const myId = draft.myPick.id;
+
+  setAdvicePhase(2, 'Runes & Summoner Spells');
+  document.getElementById('draftAdvice').className = 'advice-text muted';
+  document.getElementById('draftAdvice').textContent = 'Récupération des données OP.GG...';
+
+  // Fetch OP.GG build data for this champion
+  let opggContext = '';
+  if (IS_ELECTRON && myId) {
+    setOpggStatus('Chargement...', null);
+    const buildData = await window.electronAPI.opggBuild(myId, myRole);
+    const buildText = formatOpggBuild(buildData);
+    if (buildText) {
+      opggContext = '\n\n' + buildText;
+      setOpggStatus('✓ Build frais', true);
+    } else {
+      setOpggStatus('Non disponible', false);
+    }
+  }
+
+  document.getElementById('draftAdvice').textContent = 'Calcul des runes optimales...';
+
+  try {
+    const text = await claudeComplete(
+      `Tu es un coach LoL Diamond+. Tous les champions ont été lockés.\n\n` +
+      `**Mon champion**: ${my} (${myRole})\n` +
+      `**Mon équipe**: ${allies.join(', ')}\n` +
+      `**Équipe ennemie**: ${enemies.join(', ')}\n` +
+      `**Bans**: ${bans.join(', ') || 'aucun'}` +
+      opggContext + '\n\n' +
+      `En tenant compte des données OP.GG ci-dessus si disponibles, donne les runes et summoner spells optimaux pour ${my} face à cette composition. ` +
+      `Explique brièvement pourquoi (1 phrase).\n\n` +
+      `Ajoute obligatoirement à la fin :\n` +
+      `RUNES_JSON:{"primary":{"path":"NomChemin","keystone":"NomKeystone","runes":["r1","r2","r3"]},"secondary":{"path":"NomChemin","runes":["r1","r2"]},"stats":["stat1","stat2","stat3"],"spells":["spell1","spell2"],"earlyTips":"Conseil early 2-3 phrases."}\n\n` +
+      `Réponds en français.`
+    );
+    const jm = text.match(/RUNES_JSON:(\{[\s\S]+\})/);
+    let runesData = null;
+    let displayText = text;
+    if (jm) { try { runesData = JSON.parse(jm[1]); } catch {} displayText = text.replace(/RUNES_JSON:[\s\S]+$/, '').trim(); }
+    document.getElementById('draftAdvice').className = 'advice-text';
+    document.getElementById('draftAdvice').innerHTML = displayText.replace(/\n/g,'<br>').replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>');
+    if (runesData) renderRunesSpells(runesData);
+    notifyAdvice('lolbrain', '#lbAdvicePanel', 'Runes & Summoner Spells', displayText);
+    ttsAutoSpeak('draft', displayText);
+  } catch(e) {
+    document.getElementById('draftAdvice').className = 'advice-text muted';
+    document.getElementById('draftAdvice').textContent = 'Erreur : ' + (e?.message || e);
+  }
+}
+
+const lcuRoleMap = {
+  top: 'TOP', jungle: 'JGL', middle: 'MID', bottom: 'ADC', utility: 'SUP'
+};
+
+function champColor(name) {
+  let h = 0;
+  for (let i = 0; i < name.length; i++) h = (h * 31 + name.charCodeAt(i)) & 0xffff;
+  const hue = h % 360;
+  return { bg: `hsl(${hue},42%,18%)`, border: `hsl(${hue},52%,34%)`, text: `hsl(${hue},75%,70%)` };
+}
+
+function champAvatar(name, size) {
+  const champ = allChamps.find(c => c.name === name);
+  if (champ?.img) {
+    return `<img src="${champ.img}" style="width:100%;height:100%;object-fit:cover;border-radius:3px;" />`;
+  }
+  const c = champColor(name);
+  const initials = name.replace(/[^a-zA-Z ]/g,'').split(' ').map(w=>w[0]||'').join('').substring(0,2).toUpperCase() || name.substring(0,2).toUpperCase();
+  const fs = size === 'sm' ? '9px' : size === 'lg' ? '15px' : '11px';
+  return `<div style="width:100%;height:100%;background:${c.bg};border:1px solid ${c.border};border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:${fs};font-weight:700;color:${c.text};font-family:var(--mono);letter-spacing:.02em;">${initials}</div>`;
+}
+
+function renderGrid(champs) {
+  const unavail = [...draft.blueBans,...draft.redBans,...draft.bluePicks,...draft.redPicks].filter(Boolean).map(c=>c.name);
+  document.getElementById('champGrid').innerHTML = champs.map(c=>`
+    <div class="champ-cell ${selectedChamp?.id===c.id?'selected':''} ${unavail.includes(c.name)?'unavailable':''}" onclick="selectChamp('${c.id}','${c.name.replace(/'/g,"\\'").replace(/"/g,'&quot;')}','')">
+      <div class="champ-avatar">${champAvatar(c.name)}</div>
+      <div class="champ-name">${c.name}</div>
+    </div>`).join('');
+}
+
+function selectChamp(id,name,img) {
+  selectedChamp={id,name,img};
+  renderGrid(filteredChamps.length?filteredChamps:allChamps);
+  ['btnAlly','btnEnemy','btnBan','btnMine'].forEach(b=>document.getElementById(b).disabled=false);
+}
+
+function filterChampions() {
+  const q=document.getElementById('champSearch').value.toLowerCase();
+  const r=document.querySelector('#filterRoles .active')?.dataset.r||'ALL';
+  filteredChamps=allChamps.filter(c=>{
+    const nm=c.name.toLowerCase().includes(q);
+    const rm=r==='ALL'||(ROLES[r]||[]).some(x=>c.name.toLowerCase().includes(x.toLowerCase())||x.toLowerCase().includes(c.name.toLowerCase()));
+    return nm&&rm;
+  });
+  renderGrid(filteredChamps);
+}
+
+function filterByRole(btn) {
+  document.querySelectorAll('#filterRoles .role-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  filterChampions();
+}
+
+function assignToDraft(type) {
+  if(!selectedChamp)return;
+  const c=selectedChamp;
+  if(type==='mine'){
+    draft.myPick=c;
+    const emptyIdx=draft.bluePicks.findIndex(s=>!s);
+    if(emptyIdx!==-1)draft.bluePicks[emptyIdx]=c;
+    document.getElementById('myChampDisplay').innerHTML=`
+      <div class="pick-slot filled-mine">
+        <div class="slot-thumb">${champAvatar(c.name,'sm')}</div>
+        <div class="slot-info"><div class="slot-name">${c.name}</div><div class="slot-role">${myRole}</div></div>
+        <span class="badge-me">Moi</span>
+      </div>`;
+  } else if(type==='ally'){
+    const i=draft.bluePicks.findIndex(s=>!s);
+    if(i!==-1)draft.bluePicks[i]=c;
+  } else if(type==='enemy'){
+    const i=draft.redPicks.findIndex(s=>!s);
+    if(i!==-1)draft.redPicks[i]=c;
+  } else if(type==='ban'){
+    if(draft.blueBans.length<=draft.redBans.length&&draft.blueBans.length<5)draft.blueBans.push(c);
+    else if(draft.redBans.length<5)draft.redBans.push(c);
+  }
+  selectedChamp=null;
+  renderBoard();
+  renderGrid(filteredChamps.length?filteredChamps:allChamps);
+  ['btnAlly','btnEnemy','btnBan','btnMine'].forEach(b=>document.getElementById(b).disabled=true);
+}
+
+function renderBoard() {
+  const bans=(arr,id)=>{ document.getElementById(id).innerHTML=Array.from({length:5},(_,i)=>{const c=arr[i];return`<div class="ban-chip ${c?'banned':''}" style="position:relative;">${c?champAvatar(c.name,'sm')+`<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;"><div style="width:80%;height:1.5px;background:var(--red);transform:rotate(-45deg);opacity:.9;"></div></div>`:`<span style="font-size:9px;color:var(--text-muted)">${i+1}</span>`}</div>`;}).join(''); };
+  bans(draft.blueBans,'blueBans');bans(draft.redBans,'redBans');
+  const picks=(arr,id,enemy)=>{ document.getElementById(id).innerHTML=Array.from({length:5},(_,i)=>{const c=arr[i];const mine=!enemy&&c&&draft.myPick?.name===c.name;return`<div class="pick-slot ${c?(enemy?'filled-red':mine?'filled-mine':'filled-blue'):''}"><div class="slot-thumb">${c?champAvatar(c.name,'sm'):''}</div><div class="slot-info"><div class="slot-name" style="font-size:11px;">${c?c.name:'—'}</div></div>${mine?'<span class="badge-me">Moi</span>':''}</div>`;}).join(''); };
+  picks(draft.bluePicks,'bluePicks',false);picks(draft.redPicks,'redPicks',true);
+}
+
+function resetDraft() {
+  draft={blueBans:[],redBans:[],bluePicks:Array(5).fill(null),redPicks:Array(5).fill(null),myPick:null};
+  lbResetTracking(); // Nouvelle draft → réinitialiser lol-brain aussi
+  lbResetRemote();
+  document.getElementById('myChampDisplay').innerHTML='<div class="pick-slot" style="border-style:dashed;opacity:.5;"><span style="font-size:12px;color:var(--text-muted);">Non sélectionné</span></div>';
+  document.getElementById('draftAdvice').textContent='Ajoute des champions à la draft puis clique sur "Analyser la compo"...';
+  document.getElementById('draftAdvice').className='advice-text muted';
+  document.getElementById('runeSpellSection').style.display='none';
+  renderBoard();
+}
+
+function setMyRole(btn) {
+  document.querySelectorAll('[data-role]').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  myRole=btn.dataset.role;
+}
+
+async function claudeComplete(prompt) {
+  if (IS_ELECTRON) {
+    const apiKey = localStorage.getItem('anthropic_api_key') || '';
+    return window.electronAPI.claudeComplete(prompt, undefined, apiKey);
+  }
+  return window.claude.complete(prompt);
+}
+
+async function analyzeComposition() {
+  const allies=draft.bluePicks.filter(Boolean).map(c=>c.name);
+  const enemies=draft.redPicks.filter(Boolean).map(c=>c.name);
+  const bans=[...draft.blueBans,...draft.redBans].filter(Boolean).map(c=>c.name);
+  const my=draft.myPick?.name||'non sélectionné';
+  if(!allies.length&&!enemies.length){document.getElementById('draftAdvice').textContent='⚠ Ajoute au moins quelques champions.';return;}
+  const btn=document.getElementById('analyzeBtn');
+  btn.disabled=true;btn.innerHTML='<div class="spinner"></div> Analyse...';
+  document.getElementById('draftAdvice').className='advice-text muted';
+  document.getElementById('draftAdvice').textContent='Analyse IA en cours...';
+  document.getElementById('adviceMeta').textContent=new Date().toLocaleTimeString();
+  try {
+    const text=await claudeComplete(`Tu es un coach League of Legends expert (niveau Diamond+). Analyse cette draft et donne des conseils précis.\n\n**Mon équipe (Bleue)**: ${allies.join(', ')||'aucun'}\n**Mon champion**: ${my} (rôle: ${myRole})\n**Équipe ennemie (Rouge)**: ${enemies.join(', ')||'aucun'}\n**Bans**: ${bans.join(', ')||'aucun'}\n\nFournis une analyse en 4 parties :\n1. **Win condition** de ma composition\n2. **Matchup ${my}** : forces et faiblesses vs compo ennemie\n3. **Summoner spells** pour ${my} en ${myRole} (avec justification)\n4. **Runes optimales** : chemin principal (keystone + 3 runes), secondaire (2 runes), stats\n\nPuis, ajoute une section "RUNES_JSON" avec ce format exact :\nRUNES_JSON:{"primary":{"path":"NomChemin","keystone":"NomKeystone","runes":["r1","r2","r3"]},"secondary":{"path":"NomChemin","runes":["r1","r2"]},"stats":["stat1","stat2","stat3"],"spells":["spell1","spell2"],"earlyTips":"Conseil early game 2-3 phrases."}\n\nRéponds en français. Sois concret et actionnable.`);
+    const jm=text.match(/RUNES_JSON:(\{[\s\S]+\})/);
+    let runesData=null;let displayText=text;
+    if(jm){try{runesData=JSON.parse(jm[1]);}catch{}displayText=text.replace(/RUNES_JSON:[\s\S]+$/,'').trim();}
+    document.getElementById('draftAdvice').className='advice-text';
+    document.getElementById('draftAdvice').innerHTML=displayText.replace(/\n/g,'<br>').replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>');
+    if(runesData)renderRunesSpells(runesData);
+  } catch(e){document.getElementById('draftAdvice').textContent='Erreur lors de l\'analyse. Vérifie ta connexion.';document.getElementById('draftAdvice').className='advice-text';}
+  btn.disabled=false;btn.textContent='Analyser la compo ↗';
+}
+
+function renderRunesSpells(d) {
+  document.getElementById('runeSpellSection').style.display='grid';
+  document.getElementById('runesDisplay').innerHTML=`
+    <div class="rune-path"><div class="rune-path-name primary">${d.primary.path}</div><div><div class="rune-item keystone">${d.primary.keystone}</div>${(d.primary.runes||[]).map(r=>`<div class="rune-item">${r}</div>`).join('')}</div></div>
+    <div class="rune-path"><div class="rune-path-name secondary">${d.secondary.path}</div><div>${(d.secondary.runes||[]).map(r=>`<div class="rune-item">${r}</div>`).join('')}<div style="margin-top:6px;padding-top:6px;border-top:1px solid var(--border);"><div style="font-size:9px;color:var(--text-muted);margin-bottom:4px;font-family:var(--mono);">STATS</div>${(d.stats||[]).map(s=>`<div class="rune-item" style="font-size:10px;">${s}</div>`).join('')}</div></div></div>`;
+  document.getElementById('spellsDisplay').innerHTML=`<div class="spell-chips">${(d.spells||[]).map(s=>`<div class="spell-chip"><div class="spell-icon" style="background:rgba(200,155,60,.15);border:1px solid rgba(200,155,60,.3);display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;color:var(--gold);font-family:var(--mono);">${s.substring(0,2).toUpperCase()}</div>${s}</div>`).join('')}</div>`;
+  document.getElementById('earlyTips').textContent=d.earlyTips||'';
+}
+
+// ═══════════════════════════════════════════════
+// Match History
+// ═══════════════════════════════════════════════
+let matchHistory = [];
+let lastSeenGameId = null;
+let pgDebriefs = JSON.parse(localStorage.getItem('pgDebriefs') || '[]');
+let postGameCheckTimer = null;
+
+async function refreshMatchHistory() {
+  const statusEl = document.getElementById('matchHistoryStatus');
+  const listEl   = document.getElementById('matchHistoryList');
+  if (statusEl) statusEl.textContent = 'Chargement…';
+
+  try {
+    const customPath = document.getElementById('lockfilePath')?.value.trim() || undefined;
+    const res = IS_ELECTRON ? await window.electronAPI.fetchMatchHistory(customPath) : null;
+
+    if (!res?.ok) {
+      listEl.innerHTML = `<div style="font-size:12px;color:var(--text-muted);font-family:var(--mono);padding:6px 0;">
+        ${res?.reason === 'no-client' ? '⚠ Client LoL non détecté — lance le jeu d\'abord' :
+          res?.reason === 'no-summoner' ? '⚠ Impossible de lire le summoner courant' :
+          res?.reason === 'no-history'  ? `⚠ Endpoint historique indisponible (status ${res.status})` :
+          `⚠ ${res?.reason || 'Erreur inconnue'}`}
+      </div>`;
+      if (statusEl) statusEl.textContent = 'Erreur';
+      return;
+    }
+
+    // Normaliser les données (la structure varie selon la version du client)
+    const games = res.data?.games?.games || res.data?.games || res.data?.matches || [];
+    matchHistory = games.map(g => normalizeMatchGame(g, res.puuid)).filter(Boolean);
+    if (statusEl) statusEl.textContent = `${matchHistory.length} parties`;
+    renderMatchHistory();
+    renderDebriefHistory();
+
+    // Calculer les stats champion depuis l'historique (remplace OP.GG)
+    computeChampStatsFromHistory();
+
+    // Mémoriser le dernier gameId connu
+    if (matchHistory.length && !lastSeenGameId) lastSeenGameId = matchHistory[0].gameId;
+
+  } catch(e) {
+    listEl.innerHTML = `<div style="font-size:12px;color:var(--red);font-family:var(--mono);">Erreur : ${e.message}</div>`;
+    if (statusEl) statusEl.textContent = 'Erreur';
+  }
+}
+
+function normalizeMatchGame(g, myPuuid) {
+  try {
+    // Trouver le participant correspondant au joueur local
+    let participant = null;
+    let championId  = null;
+
+    // Format v1 LCU (participants + participantIdentities)
+    if (g.participantIdentities && g.participants) {
+      const identity = g.participantIdentities.find(pi =>
+        pi.player?.puuid === myPuuid || pi.player?.currentAccountId === g.accountId
+      );
+      if (identity) {
+        participant = g.participants.find(p => p.participantId === identity.participantId);
+      } else {
+        participant = g.participants[0]; // fallback : premier participant
+      }
+      championId = participant?.championId;
+    }
+    // Format plat (games retournées par l'endpoint produit)
+    if (!participant && g.json) {
+      const inner = typeof g.json === 'string' ? JSON.parse(g.json) : g.json;
+      return normalizeMatchGame(inner, myPuuid);
+    }
+
+    const stats = participant?.stats || {};
+    const timeline = participant?.timeline || {};
+    const durMin   = Math.floor((g.gameDuration || 0) / 60);
+    const durSec   = String((g.gameDuration || 0) % 60).padStart(2, '0');
+    const champ    = champById[championId];
+    const items    = [0,1,2,3,4,5].map(i => stats[`item${i}`]).filter(Boolean);
+    const date     = g.gameCreation ? new Date(g.gameCreation).toLocaleDateString('fr-FR') : '—';
+    const cs       = (stats.totalMinionsKilled || 0) + (stats.neutralMinionsKilled || 0);
+    const csMin    = durMin > 0 ? Math.round(cs / durMin * 10) / 10 : 0;
+
+    return {
+      gameId:    g.gameId,
+      date,
+      champion:  champ?.name || `Champion ${championId}`,
+      championId,
+      champImg:  champ?.img || null,
+      win:       stats.win ?? false,
+      kills:     stats.kills || 0,
+      deaths:    stats.deaths || 0,
+      assists:   stats.assists || 0,
+      cs, csMin,
+      duration:  `${durMin}:${durSec}`,
+      durMin,
+      items,
+      role:      timeline.lane || timeline.role || '',
+      gameMode:  g.gameMode || '',
+    };
+  } catch { return null; }
+}
+
+function computeChampStatsFromHistory() {
+  if (!matchHistory.length) return;
+
+  // Agréger par champion
+  const map = {};
+  matchHistory.forEach(g => {
+    if (!g.champion || g.champion === '?') return;
+    if (!map[g.champion]) map[g.champion] = { name: g.champion, games: 0, wins: 0, kills: 0, deaths: 0, assists: 0 };
+    map[g.champion].games++;
+    if (g.win) map[g.champion].wins++;
+    map[g.champion].kills   += g.kills   || 0;
+    map[g.champion].deaths  += g.deaths  || 0;
+    map[g.champion].assists += g.assists || 0;
+  });
+
+  playerChampStats = Object.values(map)
+    .map(c => ({
+      name:   c.name,
+      games:  c.games,
+      wr:     Math.round(c.wins / c.games * 100),
+      kda:    c.deaths ? Math.round(((c.kills + c.assists) / c.deaths) * 10) / 10 : '∞',
+    }))
+    .sort((a, b) => b.games - a.games);
+
+  localStorage.setItem('opgg_champ_stats', JSON.stringify(playerChampStats));
+
+  const top3 = playerChampStats.slice(0, 3).map(c => `${c.name} (${c.wr}%)`).join(', ');
+  const profileEl = document.getElementById('opggProfileSummary');
+  if (profileEl) profileEl.textContent = top3;
+  setOpggStatus(`✓ ${playerChampStats.length} champs depuis historique LCU · ${top3}`, true);
+}
+
+function renderMatchHistory() {
+  const listEl = document.getElementById('matchHistoryList');
+  if (!listEl) return;
+  if (!matchHistory.length) {
+    listEl.innerHTML = '<div style="font-size:12px;color:var(--text-muted);font-family:var(--mono);padding:6px 0;">Aucune partie trouvée</div>';
+    return;
+  }
+  listEl.innerHTML = matchHistory.map((g, i) => {
+    const kda      = `${g.kills}/${g.deaths}/${g.assists}`;
+    const kdaRatio = g.deaths ? Math.round(((g.kills + g.assists) / g.deaths) * 10) / 10 : '∞';
+    const hasDebrief = pgDebriefs.find(d => d.gameId === g.gameId);
+    return `
+    <div class="mh-row ${g.win ? 'win' : 'loss'}" onclick="selectMatchForDebrief(${i})">
+      <div class="mh-champ">
+        ${g.champImg
+          ? `<img src="${g.champImg}" alt="${g.champion}" />`
+          : `<div style="width:100%;height:100%;background:var(--bg4);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;">${g.champion.substring(0,2)}</div>`}
+      </div>
+      <span class="mh-badge ${g.win ? 'win' : 'loss'}">${g.win ? 'V' : 'D'}</span>
+      <div class="mh-info">
+        <div class="mh-name">${g.champion} <span style="font-size:9px;color:var(--text-muted);font-weight:400;">${g.role || g.gameMode}</span>${hasDebrief ? ' <span style="font-size:9px;color:var(--gold);">✓ debriefé</span>' : ''}</div>
+        <div class="mh-meta">${g.date} · ${g.duration} · ${g.cs} CS (${g.csMin}/min)</div>
+      </div>
+      <div class="mh-kda"><div style="font-size:12px;">${kda}</div><div style="font-size:9px;color:var(--text-muted);">${kdaRatio} KDA</div></div>
+      <button class="btn btn-ghost mh-analyze" onclick="event.stopPropagation();selectMatchForDebrief(${i})">Analyser</button>
+    </div>`;
+  }).join('');
+}
+
+function selectMatchForDebrief(index) {
+  const g = matchHistory[index];
+  if (!g) return;
+  // Remplir le formulaire post-game
+  document.getElementById('pgChamp').value    = g.champion;
+  document.getElementById('pgKda').value      = `${g.kills}/${g.deaths}/${g.assists}`;
+  document.getElementById('pgCs').value       = g.cs;
+  document.getElementById('pgDuration').value = g.durMin;
+  document.getElementById('pgResult').value   = g.win ? 'win' : 'loss';
+  if (g.items.length) {
+    const itemNames = g.items.map(id => getItemName(id) || id).join(', ');
+    document.getElementById('pgItems').value = itemNames;
+  }
+  // Stocker l'ID pour liaison debrief
+  document.getElementById('pgResultCard').dataset.gameId = g.gameId;
+  // Scroll vers le formulaire
+  document.getElementById('pgChamp').scrollIntoView({ behavior: 'smooth', block: 'center' });
+  // Auto-lancer l'analyse
+  analyzePostGame(g.gameId);
+}
+
+// Détecter automatiquement la fin d'une partie et lancer le debrief
+function startPostGameWatch() {
+  if (postGameCheckTimer) return;
+  postGameCheckTimer = setInterval(async () => {
+    await refreshMatchHistory();
+    if (matchHistory.length && matchHistory[0].gameId !== lastSeenGameId) {
+      const newGame = matchHistory[0];
+      lastSeenGameId = newGame.gameId;
+      // Notifier et auto-analyser
+      notifyAdvice('postgame', '#tab-postgame .card', 'Partie terminée !', `${newGame.champion} · ${newGame.win ? 'Victoire' : 'Défaite'}`);
+      const pgTab = document.querySelector('[onclick*="postgame"]');
+      showTab('postgame', pgTab);
+      selectMatchForDebrief(0);
+      clearInterval(postGameCheckTimer);
+      postGameCheckTimer = null;
+    }
+  }, 30000); // vérifie toutes les 30s
+}
+
+function stopPostGameWatch() {
+  clearInterval(postGameCheckTimer);
+  postGameCheckTimer = null;
+}
+
+function toggleDebriefHistory() {
+  const list = document.getElementById('pgDebriefHistoryList');
+  const chevron = document.getElementById('pgDebriefChevron');
+  const open = list.style.display !== 'none';
+  list.style.display = open ? 'none' : 'flex';
+  chevron.textContent = open ? '▶' : '▼';
+}
+
+function renderDebriefHistory() {
+  const card = document.getElementById('pgDebriefHistoryCard');
+  const list = document.getElementById('pgDebriefHistoryList');
+  const badge = document.getElementById('pgDebriefBadge');
+  if (!pgDebriefs.length) { card.style.display = 'none'; return; }
+  card.style.display = '';
+  badge.textContent = pgDebriefs.length;
+  list.innerHTML = pgDebriefs.slice().reverse().map(d => `
+    <div style="padding:10px;background:var(--bg2);border-radius:6px;border:1px solid var(--border);border-left:3px solid ${d.win ? 'var(--green)' : 'var(--red)'}">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;flex-wrap:wrap;">
+        <span style="font-size:12px;font-weight:700;">${d.champion}</span>
+        <span style="font-size:10px;color:${d.win ? 'var(--green)' : 'var(--red)'};">${d.win ? '✓ Victoire' : '✗ Défaite'}</span>
+        <span style="font-size:10px;font-family:var(--mono);color:var(--text-muted);">${d.kda}</span>
+        <span style="font-size:10px;font-family:var(--mono);color:var(--text-muted);margin-left:auto;">${d.date}</span>
+      </div>
+      <div style="font-size:11px;color:var(--text-mid);line-height:1.6;max-height:120px;overflow:hidden;position:relative;">
+        ${d.analysis.substring(0, 400).replace(/\n/g,'<br>').replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>')}${d.analysis.length > 400 ? '…' : ''}
+      </div>
+    </div>`).join('');
+}
+
+async function analyzePostGame(linkedGameId) {
+  const champ  = document.getElementById('pgChamp').value.trim();
+  const kda    = document.getElementById('pgKda').value.trim();
+  const cs     = document.getElementById('pgCs').value;
+  const dur    = document.getElementById('pgDuration').value;
+  const result = document.getElementById('pgResult').value;
+  const items  = document.getElementById('pgItems').value.trim();
+  const notes  = document.getElementById('pgNotes').value.trim();
+  if (!champ || !kda) { alert('Champion et KDA obligatoires.'); return; }
+
+  const btn = document.getElementById('pgBtn');
+  btn.disabled = true; btn.innerHTML = '<div class="spinner"></div> Analyse...';
+  const card = document.getElementById('pgResultCard');
+  card.style.display = 'block';
+  document.getElementById('pgAnalysis').className = 'advice-text muted';
+  document.getElementById('pgAnalysis').textContent = 'Analyse IA en cours...';
+  document.getElementById('pgTimeline').innerHTML = '';
+
+  const parts = kda.split('/').map(Number);
+  const k = parts[0]||0, d = parts[1]||0, a = parts[2]||0;
+  const csMin   = dur ? Math.round((cs / dur) * 10) / 10 : '?';
+  const kdaRatio = d === 0 ? 'Perfect' : (Math.round(((k + a) / d) * 10) / 10).toString();
+
+  document.getElementById('pgResultLabel').textContent = result === 'win' ? 'Victoire' : 'Défaite';
+  document.getElementById('pgResultLabel').className = `pm-result ${result}`;
+  document.getElementById('pgKdaDisplay').innerHTML = `<span>${k}</span>/<span style="color:var(--red)">${d}</span>/<span>${a}</span> — ${champ}`;
+  document.getElementById('pgCsMin').textContent = csMin;
+  document.getElementById('pgKdaRatio').textContent = kdaRatio;
+  document.getElementById('pgDurationLabel').textContent = dur ? dur + 'min' : '?';
+
+  try {
+    const text = await claudeComplete(
+      `Tu es un coach LoL analytique et exigeant. Analyse cette partie.\n\n` +
+      `**Champion** : ${champ}\n` +
+      `**Résultat** : ${result === 'win' ? 'Victoire' : 'Défaite'}\n` +
+      `**KDA** : ${kda} (ratio : ${kdaRatio})\n` +
+      `**CS** : ${cs} en ${dur} minutes (${csMin}/min)\n` +
+      `**Items** : ${items || 'non renseigné'}\n` +
+      `**Notes** : ${notes || 'aucune'}\n\n` +
+      `Fournis :\n1. Une analyse globale honnête (3-4 phrases)\n` +
+      `2. 4-5 points d'amélioration avec timestamps\n\n` +
+      `TIMELINE_JSON:[{"time":"8:30","type":"warn","text":"..."},{"time":"15:00","type":"bad","text":"..."}]\n` +
+      `Types : good, warn, bad — Réponds en français.`
+    );
+
+    const tm = text.match(/TIMELINE_JSON:(\[[\s\S]+?\])/);
+    let tl = [], dt = text;
+    if (tm) { try { tl = JSON.parse(tm[1]); } catch {} dt = text.replace(/TIMELINE_JSON:[\s\S]+$/, '').trim(); }
+
+    document.getElementById('pgAnalysis').className = 'advice-text';
+    document.getElementById('pgAnalysis').innerHTML = dt.replace(/\n/g,'<br>').replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>');
+    if (tl.length) document.getElementById('pgTimeline').innerHTML = tl.map(t =>
+      `<div class="tl-item"><span class="tl-time">${t.time}</span><span class="tl-badge ${t.type}">${t.type==='good'?'Bien':t.type==='bad'?'Erreur':'Conseil'}</span><span class="tl-text">${t.text}</span></div>`
+    ).join('');
+
+    // Sauvegarder dans l'historique des debriefs (lié à gameId si dispo)
+    const gameId = linkedGameId || card.dataset.gameId || null;
+    // Ne pas dupliquer si déjà debriefé
+    const existingIdx = pgDebriefs.findIndex(d => d.gameId === gameId && gameId);
+    const debrief = {
+      id: Date.now(), gameId,
+      date: new Date().toLocaleDateString('fr-FR'),
+      time: new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }),
+      champion: champ, kda, win: result === 'win', cs, durMin: dur,
+      analysis: dt,
+    };
+    if (existingIdx >= 0) pgDebriefs[existingIdx] = debrief;
+    else { pgDebriefs.unshift(debrief); if (pgDebriefs.length > 50) pgDebriefs.pop(); }
+    try { localStorage.setItem('pgDebriefs', JSON.stringify(pgDebriefs)); } catch {}
+
+    renderDebriefHistory();
+    renderMatchHistory(); // Met à jour les badges "debriefé"
+
+    // Ancien système de compatibilité
+    const debrief2 = { id: Date.now(), date: new Date().toLocaleDateString('fr-FR'),
+      time: new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }),
+      champ, kda, result, cs, dur, html: dt.replace(/\n/g,'<br>').replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>') };
+    debriefsHistory.unshift(debrief2);
+    if (debriefsHistory.length > 100) debriefsHistory.pop();
+    try { localStorage.setItem('pg_history', JSON.stringify(debriefsHistory)); } catch {}
+    renderDebriefsHistory();
+
+  } catch(e) { document.getElementById('pgAnalysis').textContent = 'Erreur lors de l\'analyse. ' + (e?.message || ''); }
+  btn.disabled = false; btn.textContent = 'Analyser la partie ↗';
+}
+
+const IS_ELECTRON = typeof window.electronAPI !== 'undefined';
+
+function testLiveAPI() {
+  const el = document.getElementById('apiStatus');
+  if (!IS_ELECTRON) {
+    el.textContent = '⚠ Nécessite Electron';
+    el.style.color = 'var(--gold)';
+    return;
+  }
+  // Un seul appel de test via le polling IPC
+  window.electronAPI.startPolling();
+  window.electronAPI.onRiotData(payload => {
+    window.electronAPI.removeRiotListener();
+    window.electronAPI.stopPolling();
+    if (payload.ok) {
+      el.textContent = '✓ ' + (payload.data?.activePlayer?.summonerName || 'Connecté');
+      el.style.color = 'var(--green)';
+    } else {
+      el.textContent = '✗ LoL non lancé';
+      el.style.color = 'var(--red)';
+    }
+  });
+}
+
+// ─── In-game state ────────────────────────────────────────────────────────────
+let currentGameData = null;
+let lastEventId = -1;
+let lastAnalysisGameTime = -999;
+let ingameAnalysisTimeout = null;
+let isIngameAnalyzing  = false;
+let isItemAnalyzing    = false;
+let lastItemAnalysisTime = -999;
+let lastItemCount      = -1;
+let itemAnalysisTimeout = null;
+let ingameAdviceHistory = [];
+let earlyAdviceDone    = false;
+let isEarlyAnalyzing   = false;
+let lastGameSnapshot = null;
+let debriefsHistory = [];
+try { debriefsHistory = JSON.parse(localStorage.getItem('pg_history') || '[]'); } catch {}
+
+function startGamePolling() {
+  if (!IS_ELECTRON) return;
+  document.getElementById('pollingStatus').textContent = 'Actif';
+  document.getElementById('pollingStatus').style.color = 'var(--green)';
+  window.electronAPI.onRiotData(handleRiotData);
+  window.electronAPI.startPolling();
+}
+
+function handleRiotData(payload) {
+  const wasInGame = currentGameData !== null;
+
+  if (!payload.ok) {
+    if (wasInGame) {
+      const snapshot = lastGameSnapshot;
+      currentGameData = null;
+      lastEventId = -1;
+      lastAnalysisGameTime = -999;
+      lastGameSnapshot = null;
+      setStatus('draft', 'Partie terminée');
+      if (snapshot) setTimeout(() => autoPostGameDebrief(snapshot), 1500);
+      // Surveiller l'apparition de la nouvelle partie dans l'historique
+      startPostGameWatch();
+    }
+    return;
+  }
+
+  const data = payload.data;
+  currentGameData = data;
+  lastGameSnapshot = data;
+
+  const gt = Math.floor(data.gameData?.gameTime || 0);
+  const gm = Math.floor(gt / 60), gs = String(gt % 60).padStart(2, '0');
+  const timeStr = `${gm}:${gs}`;
+  document.getElementById('gameTimer').textContent = timeStr;
+  document.getElementById('igTimer').textContent = timeStr;
+  document.getElementById('apiStatus').textContent = '✓ ' + (data.activePlayer?.summonerName || 'Connecté');
+
+  if (!wasInGame) {
+    setStatus('live', 'Partie en cours');
+    showTab('ingame', document.getElementById('navIngame'));
+    document.getElementById('igEvents').innerHTML = '';
+    ingameAdviceHistory = [];
+    renderIngameHistory();
+    lastItemCount        = -1;
+    lastItemAnalysisTime = -999;
+    isItemAnalyzing      = false;
+    earlyAdviceDone      = false;
+    document.getElementById('igItemCard').style.display = 'none';
+    document.getElementById('igItemSuggestions').innerHTML = '';
+    document.getElementById('igEarlyCard').style.display = 'none';
+    document.getElementById('igAdvice').className = 'advice-text muted';
+    document.getElementById('igAdvice').textContent = 'Chargement des données...';
+    // Lancer le conseil de début de partie après 3s (laisser le temps aux données d'arriver)
+    setTimeout(() => triggerEarlyAdvice(false), 3000);
+  }
+
+  updateGameStateUI(data);
+
+  const events = data.events?.Events || [];
+  const newEvents = events.filter(e => e.EventID > lastEventId);
+  newEvents.forEach(e => processGameEvent(e, data));
+  if (newEvents.length) lastEventId = Math.max(...newEvents.map(e => e.EventID));
+
+  // Suivi du nombre d'items (pour affichage uniquement — analyse 100% manuelle)
+  const meSnap = data.allPlayers?.find(p => p.summonerName === data.activePlayer?.summonerName);
+  const itemCount = meSnap?.items?.length ?? -1;
+  if (itemCount !== lastItemCount) lastItemCount = itemCount;
+}
+
+function updateGameStateUI(data) {
+  const me = data.allPlayers?.find(p => p.summonerName === data.activePlayer?.summonerName);
+  if (!me) return;
+
+  const gold = Math.floor(data.activePlayer?.currentGold || 0);
+  document.getElementById('igKda').textContent = `${me.scores.kills}/${me.scores.deaths}/${me.scores.assists}`;
+  document.getElementById('igCs').textContent = me.scores.creepScore;
+  document.getElementById('igGold').textContent = gold + 'g';
+  document.getElementById('igLevel').textContent = me.level;
+
+  const DD_ITEMS = `https://ddragon.leagueoflegends.com/cdn/${ddVersion}/img/item/`;
+  document.getElementById('igItems').innerHTML = (me.items || []).slice(0, 7).map(i =>
+    `<div class="item-icon" title="${i.displayName}" style="width:28px;height:28px;border-radius:4px;border:1px solid var(--border);overflow:hidden;background:var(--bg4);">
+      <img src="${DD_ITEMS}${i.itemID}.png" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none'" />
+    </div>`
+  ).join('');
+
+  const allies = data.allPlayers?.filter(p => p.team === me.team) || [];
+  const enemies = data.allPlayers?.filter(p => p.team !== me.team) || [];
+  document.getElementById('igAllies').innerHTML = allies.map(p => playerRow(p, p.summonerName === me.summonerName)).join('') || '—';
+  document.getElementById('igEnemies').innerHTML = enemies.map(p => playerRow(p, false)).join('') || '—';
+}
+
+function playerRow(p, isMe) {
+  const score = `${p.scores.kills}/${p.scores.deaths}/${p.scores.assists}`;
+  const cs = p.scores.creepScore;
+  const items = (p.items || []).slice(0, 5).map(i => {
+    const src = `https://ddragon.leagueoflegends.com/cdn/${ddVersion}/img/item/${i.itemID}.png`;
+    return `<div class="item-icon" style="width:18px;height:18px;border-radius:2px;border:1px solid var(--border);overflow:hidden;background:var(--bg4);" title="${i.displayName}"><img src="${src}" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none'"/></div>`;
+  }).join('');
+  return `<div class="player-row">
+    <div class="player-avatar">${champAvatar(p.championName, 'sm')}</div>
+    <div class="player-champ" style="${isMe ? 'color:var(--gold);font-weight:700;' : ''}">${p.championName}${isMe ? ' ★' : ''}</div>
+    <div style="display:flex;gap:3px;margin-right:4px;">${items}</div>
+    <div class="player-score">${score} <span style="color:var(--text-muted);font-size:10px;">${cs}cs</span></div>
+  </div>`;
+}
+
+function processGameEvent(event, data) {
+  const me = data.activePlayer?.summonerName;
+  const gt = Math.floor(event.EventTime || 0);
+  const timeStr = `${Math.floor(gt / 60)}:${String(gt % 60).padStart(2, '0')}`;
+  let badge = 'warn', text = '', triggerAnalysis = null;
+
+  switch (event.EventName) {
+    case 'ChampionKill':
+      if (event.VictimName === me) {
+        badge = 'bad'; text = `Mort — tué par ${event.KillerName}`; triggerAnalysis = 'Mort';
+      } else if (event.KillerName === me) {
+        badge = 'good'; text = `Kill sur ${event.VictimName}`;
+      } else if ((event.Assisters || []).includes(me)) {
+        badge = 'good'; text = `Assist sur ${event.VictimName}`;
+      } else return;
+      break;
+    case 'DragonKill':
+      badge = event.Stolen ? 'good' : 'warn';
+      text = `Dragon ${event.DragonType || ''}${event.Stolen ? ' volé !' : ''} — ${event.KillerName}`;
+      triggerAnalysis = 'Objectif';
+      break;
+    case 'BaronKill':
+      badge = event.Stolen ? 'good' : 'warn';
+      text = `Baron${event.Stolen ? ' volé !' : ''} — ${event.KillerName}`;
+      triggerAnalysis = 'Objectif';
+      break;
+    case 'TurretKilled':
+      text = `Tour détruite — ${event.KillerName}`; badge = 'warn'; break;
+    case 'FirstBlood':
+      text = `First blood : ${event.Recipient}`; badge = event.Recipient === me ? 'good' : 'warn'; break;
+    case 'InhibKilled':
+      text = `Inhibiteur détruit — ${event.KillerName}`; badge = 'warn'; break;
+    default: return;
+  }
+
+  const container = document.getElementById('igEvents');
+  const el = document.createElement('div');
+  el.className = 'tl-item';
+  el.innerHTML = `<span class="tl-time">${timeStr}</span><span class="tl-badge ${badge}">${badge === 'good' ? 'Bien' : badge === 'bad' ? 'Attention' : 'Info'}</span><span class="tl-text">${text}</span>`;
+  container.insertBefore(el, container.firstChild);
+
+  // Pas de déclenchement auto — analyse manuelle uniquement
+}
+
+function scheduleIngameAnalysis(data, trigger) {
+  clearTimeout(ingameAnalysisTimeout);
+  ingameAnalysisTimeout = setTimeout(() => analyzeInGame(trigger), 2000);
+}
+
+function manualIngameAnalysis() {
+  if (currentGameData) analyzeInGame('Manuel');
+}
+
+function scheduleItemAnalysis(data) {
+  clearTimeout(itemAnalysisTimeout);
+  itemAnalysisTimeout = setTimeout(() => analyzeItemization(data), 2500);
+}
+
+function manualItemAnalysis() {
+  if (currentGameData) analyzeItemization(currentGameData);
+}
+
+// ─── Conseil de début de partie ──────────────────────────────────────────────
+
+async function triggerEarlyAdvice(force) {
+  if ((earlyAdviceDone && !force) || isEarlyAnalyzing) return;
+  const data = currentGameData;
+  if (!data) return;
+
+  isEarlyAnalyzing = true;
+  const card = document.getElementById('igEarlyCard');
+  card.style.display = '';
+  document.getElementById('igEarlyStarters').innerHTML =
+    '<div style="font-size:11px;color:var(--text-muted);font-style:italic;">Calcul en cours…</div>';
+  document.getElementById('igEarlyTips').innerHTML = '';
+  document.getElementById('igEarlyMeta').textContent = 'Génération…';
+
+  const me = data.allPlayers?.find(p => p.summonerName === data.activePlayer?.summonerName);
+  if (!me) { isEarlyAnalyzing = false; return; }
+
+  const champ   = me.championName;
+  const enemies = (data.allPlayers || []).filter(p => p.team !== me.team).map(p => p.championName);
+  const allies  = (data.allPlayers || []).filter(p => p.team === me.team && p.summonerName !== me.summonerName).map(p => p.championName);
+  const role    = myRole || 'inconnu';
+  const spells  = [data.activePlayer?.summonerSpells?.summonerSpellOne?.displayName,
+                   data.activePlayer?.summonerSpells?.summonerSpellTwo?.displayName].filter(Boolean).join(', ') || 'inconnu';
+
+  try {
+    const text = await claudeComplete(
+      `Tu es un coach LoL expert. Le joueur vient de démarrer une partie.\n\n` +
+      `**Champion** : ${champ} (${role})\n` +
+      `**Sorts d'invocateur** : ${spells}\n` +
+      `**Alliés** : ${allies.join(', ') || 'inconnus'}\n` +
+      `**Ennemis** : ${enemies.join(', ') || 'inconnus'}\n\n` +
+      `Donne :\n` +
+      `1. Les items de départ recommandés (starter items). Réponds UNIQUEMENT sous cette forme :\n` +
+      `STARTERS_JSON:[{"id":1055,"name":"Lame de Doran","cost":450,"reason":"sustain en lane vs poke"},{"id":2003,"name":"Fiole de vie","cost":50,"reason":"sustain supplémentaire"}]\n\n` +
+      `2. Ensuite, 3 à 5 conseils courts sur comment jouer l'early game (lane phase), matchup, et positionne-toi. Bullet points en français, max 2 lignes chacun.\n` +
+      `TIPS_START\n- Conseil 1\n- Conseil 2\nTIPS_END`
+    );
+
+    // Parser les starters
+    const starterMatch = text.match(/STARTERS_JSON:(\[[\s\S]+?\])/);
+    const tipsMatch    = text.match(/TIPS_START\n([\s\S]+?)\nTIPS_END/);
+
+    if (starterMatch) {
+      try {
+        const items = JSON.parse(starterMatch[1]);
+        renderEarlyStarters(items);
+      } catch {
+        document.getElementById('igEarlyStarters').innerHTML =
+          '<div style="font-size:11px;color:var(--text-muted);">Items non parsés</div>';
+      }
+    }
+
+    if (tipsMatch) {
+      const tips = tipsMatch[1].split('\n').filter(l => l.trim().startsWith('-'));
+      document.getElementById('igEarlyTips').innerHTML = tips.map(t =>
+        `<div style="display:flex;gap:6px;margin-bottom:5px;">
+          <span style="color:var(--gold);flex-shrink:0;">▸</span>
+          <span>${t.replace(/^-\s*/,'')}</span>
+        </div>`
+      ).join('');
+    } else {
+      // Fallback : afficher le texte brut
+      document.getElementById('igEarlyTips').innerHTML =
+        `<div style="font-size:12px;line-height:1.7;">${text.replace(/STARTERS_JSON[\s\S]+?\]/,'').replace(/\n/g,'<br>')}</div>`;
+    }
+
+    const now = new Date().toLocaleTimeString('fr-FR', { hour:'2-digit', minute:'2-digit' });
+    document.getElementById('igEarlyMeta').textContent = now;
+    earlyAdviceDone = true;
+    ttsAutoSpeak('ingame', document.getElementById('igEarlyTips').innerText);
+  } catch(e) {
+    document.getElementById('igEarlyStarters').innerHTML = '';
+    document.getElementById('igEarlyTips').innerHTML =
+      `<div style="font-size:12px;color:var(--text-muted);">Erreur : ${e?.message || e}</div>`;
+  }
+  isEarlyAnalyzing = false;
+}
+
+function renderEarlyStarters(items) {
+  const BASE = `https://ddragon.leagueoflegends.com/cdn/${ddVersion}/img/item/`;
+  document.getElementById('igEarlyStarters').innerHTML = items.map(item => `
+    <div title="${item.name}${item.reason ? ' — ' + item.reason : ''}"
+         style="display:flex;flex-direction:column;align-items:center;gap:3px;cursor:default;">
+      <div style="width:44px;height:44px;border-radius:6px;border:2px solid var(--gold);overflow:hidden;background:var(--bg4);">
+        <img src="${BASE}${item.id}.png" style="width:100%;height:100%;object-fit:cover;"
+             onerror="this.parentElement.innerHTML='<span style=\\'font-size:20px;display:flex;align-items:center;justify-content:center;height:100%;\\'>🗡</span>'" />
+      </div>
+      <span style="font-size:9px;color:var(--text-muted);text-align:center;max-width:50px;line-height:1.2;font-family:var(--mono);">${item.name.split(' ').slice(0,2).join(' ')}</span>
+      ${item.cost ? `<span style="font-size:9px;color:var(--gold);font-family:var(--mono);">${item.cost}g</span>` : ''}
+    </div>`
+  ).join('');
+}
+
+async function analyzeItemization(data) {
+  if (isItemAnalyzing) return;
+  const me = data.allPlayers?.find(p =>
+    p.summonerName === data.activePlayer?.summonerName ||
+    p.riotId === data.activePlayer?.riotId
+  );
+  if (!me) return;
+
+  isItemAnalyzing = true;
+  const card = document.getElementById('igItemCard');
+  card.style.display = '';
+  document.getElementById('igItemMeta').textContent = 'Analyse…';
+  document.getElementById('igItemSuggestions').innerHTML =
+    '<div style="font-size:12px;color:var(--text-muted);font-style:italic;padding:4px 0;">Calcul en cours…</div>';
+
+  const enemies  = (data.allPlayers || []).filter(p => p.team !== me.team);
+  const gold     = Math.floor(data.activePlayer?.currentGold || 0);
+  const gameTime = Math.floor(data.gameData?.gameTime || 0);
+  const gm = Math.floor(gameTime / 60), gs = String(gameTime % 60).padStart(2, '0');
+  const curItems = (me.items || []).map(i => getItemName(i.itemID) || i.displayName).filter(Boolean);
+  const enemyComp = enemies.map(p => p.championName).join(', ') || 'inconnu';
+  const stats = data.activePlayer?.championStats;
+  const adStr = stats ? `AD ${Math.round(stats.attackDamage)} / AP ${Math.round(stats.abilityPower)} / Armure ${Math.round(stats.armor)} / RM ${Math.round(stats.magicResist)}` : '';
+
+  try {
+    const text = await claudeComplete(
+      `Tu es un expert LoL en itemisation. Analyse la situation et recommande les 3 prochains achats.\n\n` +
+      `**Champion** : ${me.championName} (${myRole})\n` +
+      `**Temps de jeu** : ${gm}:${gs}\n` +
+      `**Or disponible** : ${gold}\n` +
+      `**Items actuels** : ${curItems.join(', ') || 'aucun'}\n` +
+      `**Stats actuelles** : ${adStr}\n` +
+      `**Composition ennemie** : ${enemyComp}\n` +
+      `**KDA** : ${me.scores.kills}/${me.scores.deaths}/${me.scores.assists}\n\n` +
+      `Réponds UNIQUEMENT avec ce JSON (IDs d'items LoL réels) :\n` +
+      `ITEMS_JSON:[{"id":3078,"name":"Trinity Force","cost":3333,"reason":"..."},{"id":3071,"name":"Black Cleaver","cost":3000,"reason":"..."},{"id":3111,"name":"Chaussures de Mercure","cost":1100,"reason":"..."}]\n` +
+      `Sois précis sur les IDs. Réponds en français.`
+    );
+
+    const jm = text.match(/ITEMS_JSON:(\[[\s\S]+?\])/);
+    if (jm) {
+      try {
+        const parsed = JSON.parse(jm[1]);
+        renderItemSuggestions(parsed, gm, gs);
+        lastItemAnalysisTime = gameTime;
+      } catch {
+        document.getElementById('igItemSuggestions').innerHTML =
+          `<div style="font-size:12px;color:var(--text);line-height:1.7;">${text.replace(/\n/g,'<br>').replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>')}</div>`;
+      }
+    } else {
+      document.getElementById('igItemSuggestions').innerHTML =
+        `<div style="font-size:12px;color:var(--text);line-height:1.7;">${text.replace(/\n/g,'<br>').replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>')}</div>`;
+    }
+    document.getElementById('igItemMeta').textContent = `${gm}:${gs}`;
+  } catch(e) {
+    document.getElementById('igItemSuggestions').innerHTML =
+      `<div style="font-size:12px;color:var(--text-muted);">Erreur : ${e?.message || e}</div>`;
+  }
+  isItemAnalyzing = false;
+}
+
+function renderItemSuggestions(items, gm, gs) {
+  const BASE = `https://ddragon.leagueoflegends.com/cdn/${ddVersion}/img/item/`;
+  document.getElementById('igItemSuggestions').innerHTML = items.map((item, i) => `
+    <div style="display:flex;align-items:flex-start;gap:10px;padding:9px;background:var(--bg2);border-radius:6px;border:1px solid var(--border);">
+      <div style="position:relative;flex-shrink:0;">
+        <div style="width:40px;height:40px;border-radius:5px;border:1px solid var(--border-bright);overflow:hidden;background:var(--bg4);">
+          <img src="${BASE}${item.id}.png" style="width:100%;height:100%;object-fit:cover;"
+               onerror="this.parentElement.innerHTML='<span style=\\'font-size:18px;display:flex;align-items:center;justify-content:center;height:100%;\\'>🗡</span>'" />
+        </div>
+        <span style="position:absolute;top:-5px;left:-5px;background:${i===0?'var(--gold)':i===1?'var(--text-mid)':'var(--border-bright)'};color:var(--bg);font-size:9px;font-weight:800;width:15px;height:15px;border-radius:50%;display:flex;align-items:center;justify-content:center;">${i+1}</span>
+      </div>
+      <div style="flex:1;min-width:0;">
+        <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+          <span style="font-size:12px;font-weight:700;color:var(--text);">${item.name}</span>
+          ${item.cost ? `<span style="font-size:10px;font-family:var(--mono);color:var(--gold);">${item.cost}or</span>` : ''}
+        </div>
+        <div style="font-size:11px;color:var(--text-mid);line-height:1.5;margin-top:3px;">${item.reason}</div>
+      </div>
+    </div>`).join('');
+}
+
+function toggleIngameHistory() {
+  const list = document.getElementById('igHistoryList');
+  const chevron = document.getElementById('igHistoryChevron');
+  const open = list.style.display !== 'none';
+  list.style.display = open ? 'none' : 'flex';
+  chevron.textContent = open ? '▼' : '▲';
+}
+
+function toggleDebriefsHistory() {
+  const list = document.getElementById('pgHistoryList');
+  const chevron = document.getElementById('pgHistoryChevron');
+  const open = list.style.display !== 'none';
+  list.style.display = open ? 'none' : 'flex';
+  chevron.textContent = open ? '▼' : '▲';
+}
+
+function renderDebriefsHistory() {
+  const badge = document.getElementById('pgHistoryBadge');
+  const list = document.getElementById('pgHistoryList');
+  if (!badge || !list) return;
+  badge.textContent = debriefsHistory.length;
+  badge.style.display = debriefsHistory.length ? '' : 'none';
+  list.innerHTML = debriefsHistory.map((d, i) => `
+    <div style="border:1px solid var(--border);border-radius:6px;padding:12px;background:var(--bg2);cursor:pointer;" onclick="this.querySelector('.pg-hist-body').style.display=this.querySelector('.pg-hist-body').style.display==='none'?'block':'none'">
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+        <span class="pm-result ${d.result}" style="font-size:11px;padding:2px 7px;">${d.result === 'win' ? 'Victoire' : 'Défaite'}</span>
+        <span style="font-size:12px;font-weight:700;color:var(--text);">${d.champ}</span>
+        <span style="font-size:11px;font-family:var(--mono);color:var(--text-mid);">${d.kda}</span>
+        <span style="font-size:10px;color:var(--text-muted);">${d.cs} CS · ${d.dur}min</span>
+        <span style="font-size:10px;color:var(--text-muted);margin-left:auto;">${d.date} ${d.time}</span>
+      </div>
+      <div class="pg-hist-body advice-text" style="display:none;margin-top:10px;font-size:12px;line-height:1.7;">${d.html}</div>
+    </div>`).join('');
+}
+
+function renderIngameHistory() {
+  const card = document.getElementById('igHistoryCard');
+  const list = document.getElementById('igHistoryList');
+  const badge = document.getElementById('igHistoryBadge');
+  if (!ingameAdviceHistory.length) { card.style.display = 'none'; return; }
+  card.style.display = '';
+  badge.textContent = ingameAdviceHistory.length;
+  badge.style.display = '';
+  list.innerHTML = ingameAdviceHistory.map((h, i) => `
+    <div style="border:1px solid var(--border);border-radius:6px;padding:10px;background:var(--bg2);">
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;">
+        <span class="phase-badge p${i === 0 ? '1' : '2'}" style="font-size:8px;">${h.trigger}</span>
+        <span style="font-size:10px;font-family:var(--mono);color:var(--gold);">${h.time}</span>
+        <span style="font-size:10px;color:var(--text-muted);margin-left:auto;">${h.date}</span>
+      </div>
+      <div style="font-size:12px;color:var(--text);line-height:1.6;">${h.html}</div>
+    </div>`).join('');
+}
+
+async function analyzeInGame(trigger) {
+  if (isIngameAnalyzing || !currentGameData) return;
+  isIngameAnalyzing = true;
+
+  const data = currentGameData;
+  const me = data.allPlayers?.find(p => p.summonerName === data.activePlayer?.summonerName);
+  if (!me) { isIngameAnalyzing = false; return; }
+
+  const gameTime = Math.floor(data.gameData?.gameTime || 0);
+  const gm = Math.floor(gameTime / 60), gs = String(gameTime % 60).padStart(2, '0');
+  const timeStr = `${gm}:${gs}`;
+
+  const badge = document.getElementById('igTriggerBadge');
+  badge.textContent = trigger;
+  badge.className = `phase-badge ${trigger === 'Mort' ? 'p1' : trigger === 'Objectif' ? 'p2' : 'p1'}`;
+  badge.style.display = '';
+  document.getElementById('igAdviceMeta').textContent = timeStr;
+  document.getElementById('igAdvice').className = 'advice-text muted';
+  document.getElementById('igAdvice').textContent = 'Analyse en cours...';
+
+  const allies = data.allPlayers?.filter(p => p.team === me.team && p.summonerName !== me.summonerName) || [];
+  const enemies = data.allPlayers?.filter(p => p.team !== me.team) || [];
+  const gold = Math.floor(data.activePlayer?.currentGold || 0);
+  const items = me.items?.map(i => getItemName(i.itemID) || i.displayName).join(', ') || 'aucun';
+  const allyInfo = allies.map(p => `${p.championName} ${p.scores.kills}/${p.scores.deaths}/${p.scores.assists} [${p.items?.slice(0,3).map(i=>getItemName(i.itemID) || i.displayName).join('+')||'pas d\'items'}]`).join(' | ');
+  const enemyInfo = enemies.map(p => `${p.championName} ${p.scores.kills}/${p.scores.deaths}/${p.scores.assists} [${p.items?.slice(0,3).map(i=>getItemName(i.itemID) || i.displayName).join('+')||'pas d\'items'}]`).join(' | ');
+
+  const focus = {
+    'Mort': 'Je viens de mourir. Analyse la situation et dis-moi ce que j\'aurais dû faire différemment (positioning, trading, vision, timing).',
+    'Objectif': 'Un objectif majeur vient d\'apparaître ou d\'être tué. Dis-moi quoi faire maintenant (rotation, vision, push, retour en base).',
+    'Routine': 'Analyse ma situation globale : farm, trade pattern, itemisation, rotations à envisager.',
+    'Manuel': 'Analyse complète de ma situation : laning, itemisation, rotations, vision, win condition.',
+  }[trigger] || 'Analyse ma situation.';
+
+  try {
+    const text = await claudeComplete(
+      `Tu es un coach LoL Diamond+ qui observe ma partie. Sois concis et ultra-actionnable.\n\n` +
+      `**Temps** : ${timeStr}\n` +
+      `**Mon champion** : ${me.championName} niv.${me.level} (${myRole})\n` +
+      `**KDA** : ${me.scores.kills}/${me.scores.deaths}/${me.scores.assists} — CS : ${me.scores.creepScore} — Or en main : ${gold}g\n` +
+      `**Mes items** : ${items}\n` +
+      `**Alliés** : ${allyInfo || 'aucun'}\n` +
+      `**Ennemis** : ${enemyInfo || 'aucun'}\n\n` +
+      `${focus}\n\nMax 3 conseils, bullet points courts. Réponds en français.`
+    );
+    lastAnalysisGameTime = data.gameData?.gameTime || 0;
+    const igHtml = text.replace(/\n/g, '<br>').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+    document.getElementById('igAdvice').className = 'advice-text';
+    document.getElementById('igAdvice').innerHTML = igHtml;
+    ingameAdviceHistory.unshift({
+      time: timeStr,
+      trigger,
+      date: new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }),
+      html: igHtml,
+      raw: text
+    });
+    renderIngameHistory();
+    notifyAdvice('ingame', '#tab-ingame .advice-box', `Coach — ${trigger}`, text);
+    ttsAutoSpeak('ingame', text);
+  } catch (e) {
+    document.getElementById('igAdvice').className = 'advice-text muted';
+    document.getElementById('igAdvice').textContent = 'Erreur : ' + (e?.message || e);
+  }
+  isIngameAnalyzing = false;
+}
+
+async function autoPostGameDebrief(data) {
+  const me = data.allPlayers?.find(p =>
+    p.summonerName === data.activePlayer?.summonerName ||
+    p.summonerName === data.activePlayer?.riotId?.split('#')[0]
+  ) || data.allPlayers?.find(p => p.team === (data.activePlayer?.team || 'ORDER'));
+  if (!me) return;
+
+  const kda = `${me.scores?.kills || 0}/${me.scores?.deaths || 0}/${me.scores?.assists || 0}`;
+  const cs = me.scores?.creepScore || 0;
+  const dur = Math.floor((data.gameData?.gameTime || 0) / 60);
+  const items = (me.items || []).slice(0, 6).map(i => getItemName(i.itemID) || i.displayName).filter(Boolean).join(', ');
+  const champ = me.championName || '';
+
+  // Chercher l'event GameEnd pour le résultat
+  const events = data.events?.Events || [];
+  const gameEndEvt = events.find(e => e.EventName === 'GameEnd');
+  const result = gameEndEvt
+    ? (gameEndEvt.Result === 'Win' || gameEndEvt.Result === 'Victory' ? 'win' : 'loss')
+    : 'loss';
+
+  // Préparer les notes avec l'historique des conseils
+  const historyNotes = ingameAdviceHistory.length
+    ? 'Conseils reçus en jeu :\n' + ingameAdviceHistory.slice(0, 5).map(h =>
+        `[${h.time}] ${h.trigger}: ${h.raw?.replace(/<[^>]+>/g,'').substring(0, 120)}`
+      ).join('\n')
+    : '';
+
+  document.getElementById('pgChamp').value = champ;
+  document.getElementById('pgKda').value = kda;
+  document.getElementById('pgCs').value = cs;
+  document.getElementById('pgDuration').value = dur;
+  document.getElementById('pgResult').value = result;
+  document.getElementById('pgItems').value = items;
+  document.getElementById('pgNotes').value = historyNotes;
+
+  // Aller sur l'onglet post-game
+  const pgTab = document.querySelector('[onclick*="postgame"]');
+  showTab('postgame', pgTab);
+
+  await analyzePostGame();
+}
+
+function startPolling() {
+  if (!IS_ELECTRON) {
+    document.getElementById('pollingStatus').textContent = 'Non disponible';
+    document.getElementById('pollingStatus').style.color = 'var(--gold)';
+    return;
+  }
+  startGamePolling();
+}
+
+function stopPolling() {
+  if (IS_ELECTRON) {
+    window.electronAPI.stopPolling();
+    window.electronAPI.removeRiotListener();
+  }
+  document.getElementById('pollingStatus').textContent = 'Inactif';
+  document.getElementById('pollingStatus').style.color = '';
+}
+
+function setStatus(type,label) {document.getElementById('statusDot').className=`status-dot ${type}`;document.getElementById('statusLabel').textContent=label;}
+
+function showTab(tab,btn) {
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('tab-'+tab).classList.add('active');
+  // Plein écran pour l'onglet lol-brain (pas de padding, overflow hidden)
+  const mainEl = document.querySelector('main');
+  if (tab === 'lolbrain') {
+    mainEl.classList.add('fullscreen');
+  } else {
+    mainEl.classList.remove('fullscreen');
+  }
+  if (btn) {
+    btn.classList.add('active');
+    btn.querySelector('.notif-dot')?.remove();
+    btn.classList.remove('has-notif');
+  }
+}
+
+// ─── OP.GG ───────────────────────────────────────────────────────────────────
+
+function dig(obj, ...paths) {
+  for (const path of paths) {
+    let v = obj;
+    for (const key of path.split('.')) { v = v?.[key]; }
+    if (v !== undefined && v !== null) return v;
+  }
+  return null;
+}
+
+function parseWinRate(raw) {
+  if (raw === null || raw === undefined) return null;
+  return typeof raw === 'number' && raw <= 1 ? (raw * 100).toFixed(1) + '%' : raw + '%';
+}
+
+// Formate la réponse tier list OP.GG en texte pour le prompt Claude
+function formatOpggTier(payload, role) {
+  if (!payload?.ok || !payload.data) return null;
+  try {
+    const d = payload.data;
+    // OP.GG renvoie souvent { data: [...] } ou directement [...]
+    const list = Array.isArray(d) ? d : Array.isArray(d.data) ? d.data : null;
+    if (!list || !list.length) return null;
+
+    const roleKey = { TOP: 'top', JGL: 'jungle', MID: 'mid', ADC: 'adc', SUP: 'support' }[role] || role;
+    const relevant = list
+      .filter(c => {
+        const pos = dig(c, 'position', 'role', 'lane');
+        return !pos || pos.toLowerCase() === roleKey;
+      })
+      .sort((a, b) => {
+        const ta = dig(a, 'tier', 'tier_data.tier') ?? 99;
+        const tb = dig(b, 'tier', 'tier_data.tier') ?? 99;
+        return ta - tb;
+      })
+      .slice(0, 10);
+
+    if (!relevant.length) return null;
+
+    const lines = relevant.map(c => {
+      const name = dig(c, 'champion.name', 'champion_name', 'name') || '?';
+      const tier = dig(c, 'tier', 'tier_data.tier');
+      const wr = parseWinRate(dig(c, 'win_rate', 'stats.win_rate', 'winRate'));
+      const pr = dig(c, 'pick_rate', 'stats.pick_rate', 'pickRate');
+      return [name, tier !== null ? `T${tier}` : '', wr || '', pr ? `${(pr * 100).toFixed(1)}% pick` : ''].filter(Boolean).join(' ');
+    });
+
+    return `Tier list OP.GG ${role} (Platinum+, patch actuel) :\n${lines.map(l => `• ${l}`).join('\n')}`;
+  } catch { return null; }
+}
+
+// Formate le build OP.GG d'un champion en texte pour le prompt Claude
+function formatOpggBuild(payload) {
+  if (!payload?.ok || !payload.data) return null;
+  try {
+    const d = payload.data?.data || payload.data;
+    const lines = [];
+
+    // Win rate
+    const wr = parseWinRate(dig(d, 'win_rate', 'stats.win_rate', 'winRate', 'win'));
+    if (wr) lines.push(`Win rate: ${wr}`);
+
+    // Runes
+    const runePages = dig(d, 'runes', 'summaryRunes', 'rune_pages');
+    const rp = Array.isArray(runePages) ? runePages[0] : runePages;
+    if (rp) {
+      const keystone = dig(rp, 'keystone.name', 'runes.0.name', 'primary_rune_name', 'keystoneName');
+      const primary  = dig(rp, 'primary_page.name', 'primary_page_name', 'primaryPath', 'primaryStyleName');
+      const secondary= dig(rp, 'secondary_page.name', 'secondary_page_name', 'secondaryPath', 'secondaryStyleName');
+      if (keystone) lines.push(`Keystone: ${keystone}`);
+      if (primary)  lines.push(`Path principal: ${primary}`);
+      if (secondary)lines.push(`Path secondaire: ${secondary}`);
+    }
+
+    // Items core
+    const core = dig(d, 'main_items', 'summaryItems.core', 'items.core', 'coreItems');
+    if (Array.isArray(core) && core.length) {
+      const names = core.slice(0, 4).map(i => dig(i, 'name', 'display_name', 'displayName') || `#${i.id || '?'}`);
+      lines.push(`Build core: ${names.join(' → ')}`);
+    }
+
+    // Boots
+    const boots = dig(d, 'boots.0.name', 'summaryBoots.0.name', 'boots.name');
+    if (boots) lines.push(`Boots: ${boots}`);
+
+    // Summoner spells
+    const spellSet = dig(d, 'summoner_spells.0.spells', 'summarySummonerSpells.0.spells', 'summonerSpells');
+    if (Array.isArray(spellSet) && spellSet.length) {
+      const names = spellSet.map(s => dig(s, 'name', 'spell_name') || s).filter(Boolean);
+      if (names.length) lines.push(`Summoner spells: ${names.join(' + ')}`);
+    }
+
+    // Skill order
+    const skills = dig(d, 'skill_masteries.0.ids', 'skillOrder', 'skills');
+    if (Array.isArray(skills) && skills.length) {
+      lines.push(`Ordre des skills: ${skills.slice(0, 5).join(' → ')}`);
+    }
+
+    if (!lines.length) return null;
+    return `Données OP.GG actuelles (Platinum+, patch actuel) :\n${lines.map(l => `• ${l}`).join('\n')}`;
+  } catch { return null; }
+}
+
+function setOpggStatus(msg, ok) {
+  const el = document.getElementById('opggStatus');
+  if (!el) return;
+  // Affichage compact : juste le top 3 avec win rates
+  const short = ok === true && playerChampStats?.length
+    ? playerChampStats.slice(0, 3).map(c => `${c.name} ${c.wr}%`).join(' · ')
+    : msg;
+  el.textContent = short;
+  el.style.color = ok === true ? 'var(--green)' : ok === false ? 'var(--red)' : 'var(--text-muted)';
+}
+
+// Cache du profil joueur (champions les plus joués)
+let playerChampStats = JSON.parse(localStorage.getItem('opgg_champ_stats') || 'null');
+
+function formatPlayerChampStats(payload) {
+  if (!payload?.ok || !payload.data) return null;
+  try {
+    const d = payload.data;
+    // Chercher la liste selon toutes les structures connues d'OP.GG
+    const list =
+      Array.isArray(d)                  ? d                  :
+      Array.isArray(d.data)             ? d.data             :
+      Array.isArray(d.most_champions)   ? d.most_champions   :
+      Array.isArray(d.mostChampions)    ? d.mostChampions    :
+      null;
+
+    if (!list?.length) {
+      if (payload.source === 'page-scrape') console.warn('[OP.GG scrape] structure inattendue:', JSON.stringify(d).substring(0, 400));
+      return null;
+    }
+
+    const champs = list.slice(0, 20).map(c => {
+      const name  = dig(c, 'champion.name', 'champion_name', 'name') || '?';
+      const games = dig(c, 'games', 'play', 'total_games', 'game_count') || 0;
+      const wins  = dig(c, 'wins', 'win', 'win_count') || 0;
+      const wr    = games > 0 ? Math.round(wins / games * 100) : 0;
+      return { name, games, wr };
+    }).filter(c => c.name !== '?' && c.games > 0);
+
+    return champs.length ? champs : null;
+  } catch(e) { console.error('[formatPlayerChampStats]', e); return null; }
+}
+
+function playerStatsToPrompt(stats, role) {
+  if (!stats?.length) return null;
+  const lines = stats.slice(0, 10).map(c => `${c.name} (${c.games} games, ${c.wr}% WR)`);
+  return `Historique OP.GG du joueur (ranked, tous rôles) :\n${lines.map(l => `• ${l}`).join('\n')}`;
+}
+
+async function syncOpggProfile() {
+  const name   = document.getElementById('summonerName').value.trim();
+  const region = document.getElementById('regionSelect').value;
+  if (!name) { setOpggStatus('Renseigne ton pseudo d\'abord', false); return; }
+  if (!IS_ELECTRON) { setOpggStatus('Nécessite Electron', false); return; }
+
+  setOpggStatus(`Recherche ${name} sur OP.GG…`, null);
+  document.getElementById('opggSyncBtn').disabled = true;
+
+  try {
+    const payload = await window.electronAPI.opggSummoner(name, region);
+
+    if (!payload?.ok) {
+      const tried  = payload?.tried  ? ` (slug: ${payload.tried})` : '';
+      const status = payload?.status ? ` · HTTP ${payload.status}` : '';
+      setOpggStatus(`Introuvable${tried}${status} — vérifie le pseudo`, false);
+      document.getElementById('opggSyncBtn').disabled = false;
+      return;
+    }
+
+    // source='profile-only' : summoner trouvé mais pas de stats
+    if (payload.source === 'profile-only') {
+      const sn = payload.data?.summoner?.game_name || payload.data?.summoner?.name || name;
+      setOpggStatus(`✓ Profil trouvé (${sn}) — pas encore de stats ranked`, true);
+      document.getElementById('opggProfileSummary').textContent = 'Profil détecté, stats indisponibles';
+      document.getElementById('opggSyncBtn').disabled = false;
+      return;
+    }
+
+    const stats = formatPlayerChampStats(payload);
+    if (stats?.length) {
+      playerChampStats = stats;
+      localStorage.setItem('opgg_champ_stats', JSON.stringify(stats));
+      const top3 = stats.slice(0, 3).map(c => c.name).join(', ');
+      setOpggStatus(`✓ ${stats.length} champs · Top: ${top3} [${payload.source}]`, true);
+      document.getElementById('opggProfileSummary').textContent = top3;
+    } else {
+      // Données reçues mais format non reconnu — afficher pour debug
+      const raw = JSON.stringify(payload.data).substring(0, 120);
+      setOpggStatus(`Données reçues mais format inattendu — vérifie la console`, false);
+      console.warn('[OP.GG] Format non reconnu :', payload);
+    }
+  } catch(e) {
+    setOpggStatus(`Erreur : ${e.message}`, false);
+  }
+  document.getElementById('opggSyncBtn').disabled = false;
+}
+
+// ─── Notifications ───────────────────────────────────────────────────────────
+let toastTimeout = null;
+
+function playNotificationSound() {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const gain = ctx.createGain();
+    gain.connect(ctx.destination);
+    gain.gain.setValueAtTime(0, ctx.currentTime);
+    gain.gain.linearRampToValueAtTime(0.18, ctx.currentTime + 0.02);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.5);
+    [0, 0.12, 0.22].forEach((delay, i) => {
+      const osc = ctx.createOscillator();
+      osc.connect(gain);
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime([880, 1100, 1320][i], ctx.currentTime + delay);
+      osc.start(ctx.currentTime + delay);
+      osc.stop(ctx.currentTime + delay + 0.25);
+    });
+  } catch {}
+}
+
+// ═══════════════════════════════════════════════
+// TTS — Text To Speech
+// ═══════════════════════════════════════════════
+let ttsVoices = [];
+let ttsCurrentBtn = null;
+
+function ttsInit() {
+  const load = () => {
+    ttsVoices = speechSynthesis.getVoices();
+    if (ttsVoices.length) ttsPopulateVoices();
+  };
+  load();
+  speechSynthesis.addEventListener('voiceschanged', load);
+  // Restaurer les préfs
+  const rate = localStorage.getItem('tts_rate') || '1.0';
+  const rateInput = document.getElementById('ttsRateInput');
+  if (rateInput) { rateInput.value = rate; document.getElementById('ttsRateDisplay').textContent = parseFloat(rate).toFixed(1) + '×'; }
+  const autoRead = document.getElementById('ttsAutoRead');
+  if (autoRead) autoRead.checked = localStorage.getItem('tts_auto') === 'true';
+  const summaryOnly = document.getElementById('ttsSummaryOnly');
+  if (summaryOnly) summaryOnly.checked = localStorage.getItem('tts_summary') !== 'false';
+}
+
+function ttsPopulateVoices() {
+  const sel = document.getElementById('ttsVoiceSelect');
+  if (!sel) return;
+  const saved = localStorage.getItem('tts_voice') || '';
+  // Préférer les voix françaises
+  const sorted = [...ttsVoices].sort((a, b) => {
+    const aFr = a.lang.startsWith('fr') ? -1 : 0;
+    const bFr = b.lang.startsWith('fr') ? -1 : 0;
+    return aFr - bFr;
+  });
+  sel.innerHTML = sorted.map(v =>
+    `<option value="${v.name}" ${v.name === saved ? 'selected' : ''}>${v.name} (${v.lang})${v.localService ? '' : ' ☁'}</option>`
+  ).join('');
+  const count = document.getElementById('ttsVoiceCount');
+  if (count) count.textContent = `${ttsVoices.filter(v => v.lang.startsWith('fr')).length} voix FR / ${ttsVoices.length} total`;
+}
+
+function saveTtsSettings() {
+  const rate = document.getElementById('ttsRateInput')?.value || '1.0';
+  const voice = document.getElementById('ttsVoiceSelect')?.value || '';
+  const auto = document.getElementById('ttsAutoRead')?.checked || false;
+  const summary = document.getElementById('ttsSummaryOnly')?.checked !== false;
+  localStorage.setItem('tts_rate', rate);
+  localStorage.setItem('tts_voice', voice);
+  localStorage.setItem('tts_auto', auto);
+  localStorage.setItem('tts_summary', summary);
+}
+
+function ttsStripMarkdown(text) {
+  return text
+    .replace(/#{1,6}\s+/g, '')
+    .replace(/\*\*(.*?)\*\*/g, '$1')
+    .replace(/\*(.*?)\*/g, '$1')
+    .replace(/`(.*?)`/g, '$1')
+    .replace(/^\s*[-*+•]\s+/gm, '')
+    .replace(/^\s*\d+\.\s+/gm, '')
+    .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+    .replace(/<br\s*\/?>/gi, ' ')
+    .replace(/<[^>]+>/g, '')
+    .replace(/\n{2,}/g, '. ')
+    .replace(/\n/g, ' ')
+    .replace(/\s{2,}/g, ' ')
+    .trim();
+}
+
+function ttsTruncate(text) {
+  const summaryOnly = localStorage.getItem('tts_summary') !== 'false';
+  if (!summaryOnly) return text;
+  // Garder les 3 premières phrases significatives
+  const sentences = text.match(/[^.!?]+[.!?]+/g) || [text];
+  return sentences.slice(0, 3).join(' ').trim();
+}
+
+function ttsGetVoice() {
+  const saved = localStorage.getItem('tts_voice') || '';
+  return ttsVoices.find(v => v.name === saved) ||
+         ttsVoices.find(v => v.lang === 'fr-FR' && v.localService) ||
+         ttsVoices.find(v => v.lang.startsWith('fr') && v.localService) ||
+         ttsVoices.find(v => v.lang.startsWith('fr')) ||
+         ttsVoices[0] || null;
+}
+
+function ttsSetBtnState(btnId, speaking) {
+  const btn = btnId ? document.getElementById(btnId) : null;
+  if (!btn) return;
+  btn.textContent = speaking ? '⏹' : '🔊';
+  btn.classList.toggle('speaking', speaking);
+  if (speaking) {
+    btn.onclick = ttsStop;
+  } else {
+    const type = btnId === 'ttsBtnDraft' ? 'draft' : btnId === 'ttsBtnIngame' ? 'ingame' : 'test';
+    btn.onclick = () => ttsSpeak(type);
+  }
+}
+
+function ttsSpeak(type) {
+  let text = '';
+  if (type === 'draft') text = document.getElementById('draftAdvice')?.innerText || '';
+  else if (type === 'ingame') text = document.getElementById('igAdvice')?.innerText || '';
+
+  const clean = ttsTruncate(ttsStripMarkdown(text));
+  if (!clean || clean.length < 5) return;
+
+  ttsStop();
+  const rate = parseFloat(localStorage.getItem('tts_rate') || '1.0');
+  const utterance = new SpeechSynthesisUtterance(clean);
+  utterance.lang = 'fr-FR';
+  utterance.rate = rate;
+  const voice = ttsGetVoice();
+  if (voice) utterance.voice = voice;
+
+  const btnId = type === 'draft' ? 'ttsBtnDraft' : type === 'ingame' ? 'ttsBtnIngame' : 'ttsTestBtn';
+  ttsCurrentBtn = btnId;
+  ttsSetBtnState(btnId, true);
+
+  utterance.onend = () => ttsSetBtnState(btnId, false);
+  utterance.onerror = () => ttsSetBtnState(btnId, false);
+  speechSynthesis.speak(utterance);
+}
+
+function ttsStop() {
+  speechSynthesis.cancel();
+  if (ttsCurrentBtn) { ttsSetBtnState(ttsCurrentBtn, false); ttsCurrentBtn = null; }
+}
+
+function ttsTest() {
+  ttsStop();
+  const rate = parseFloat(localStorage.getItem('tts_rate') || '1.0');
+  const text = 'Conseil de coach : ton Garen est en très bonne forme sur cette méta. Pense à rush Trinity Force et à engager sur le carry ennemi dès le niveau 6.';
+  const utterance = new SpeechSynthesisUtterance(text);
+  utterance.lang = 'fr-FR';
+  utterance.rate = rate;
+  const voice = ttsGetVoice();
+  if (voice) utterance.voice = voice;
+  ttsCurrentBtn = 'ttsTestBtn';
+  ttsSetBtnState('ttsTestBtn', true);
+  utterance.onend = () => ttsSetBtnState('ttsTestBtn', false);
+  utterance.onerror = () => ttsSetBtnState('ttsTestBtn', false);
+  speechSynthesis.speak(utterance);
+}
+
+function ttsAutoSpeak(type, rawText) {
+  if (localStorage.getItem('tts_auto') !== 'true') return;
+  // Petit délai pour laisser l'animation de notification se terminer
+  setTimeout(() => ttsSpeak(type), 800);
+}
+
+function notifyAdvice(tabId, boxSelector, title, preview) {
+  playNotificationSound();
+
+  // Glow sur la boîte
+  const box = document.querySelector(boxSelector);
+  if (box) {
+    box.classList.remove('notify');
+    void box.offsetWidth; // reflow pour relancer l'animation
+    box.classList.add('notify');
+    box.addEventListener('animationend', () => box.classList.remove('notify'), { once: true });
+  }
+
+  // Flash sur le tab si pas actif + point de notification
+  const tab = document.getElementById('navIngame') || document.querySelector(`[onclick*="'${tabId}'"]`);
+  const isActive = document.getElementById('tab-' + tabId)?.classList.contains('active');
+  if (tab && !isActive) {
+    if (!tab.querySelector('.notif-dot')) {
+      const dot = document.createElement('span');
+      dot.className = 'notif-dot';
+      tab.appendChild(dot);
+    }
+    tab.classList.remove('has-notif');
+    void tab.offsetWidth;
+    tab.classList.add('has-notif');
+  }
+
+  // Toast
+  clearTimeout(toastTimeout);
+  document.getElementById('toastTitle').textContent = title;
+  document.getElementById('toastBody').textContent = preview.replace(/<[^>]+>/g, '').substring(0, 100) + (preview.length > 100 ? '...' : '');
+  const toast = document.getElementById('toast');
+  toast.classList.add('show');
+  toastTimeout = setTimeout(() => toast.classList.remove('show'), 5000);
+}
+
+function saveApiKey() {
+  const key = document.getElementById('apiKeyInput').value.trim();
+  if (!key) return;
+  localStorage.setItem('anthropic_api_key', key);
+  document.getElementById('apiKeyInput').value = '';
+  const saved = document.getElementById('apiKeySaved');
+  saved.style.display = 'block';
+  setTimeout(() => saved.style.display = 'none', 3000);
+}
+
+// Afficher si une clé est déjà enregistrée
+window.addEventListener('DOMContentLoaded', () => {
+  if (localStorage.getItem('anthropic_api_key')) {
+    document.getElementById('apiKeyInput').placeholder = '••••••••••••••••••• (clé enregistrée)';
+  }
+  if (playerChampStats?.length) {
+    document.getElementById('opggProfileSummary').textContent = playerChampStats.slice(0, 3).map(c => c.name).join(', ');
+  }
+});
+
+// ─── lol-brain.com Webview ─────────────────────────────────────────────────
+
+const LB_SECTIONS = ['draft','dashboard','best-time','tilt','queue'];
+
+function lolbrainGo(section, btn) {
+  const wv = document.getElementById('lolbrainWebview');
+  if (!wv) return;
+  wv.src = `https://www.lol-brain.com/${section}`;
+  document.querySelectorAll('[id^="lb-btn-"]').forEach(b => b.classList.remove('active'));
+  (btn || document.getElementById(`lb-btn-${section}`))?.classList.add('active');
+}
+
+function lolbrainNav(action) {
+  const wv = document.getElementById('lolbrainWebview');
+  if (!wv) return;
+  if (action === 'back') wv.goBack();
+  else if (action === 'reload') wv.reload();
+}
+
+async function lolbrainReSync() {
+  const statusEl = document.getElementById('lolbrainStatus');
+  const wv = document.getElementById('lolbrainWebview');
+  if (!wv || !IS_ELECTRON) return;
+  if (statusEl) { statusEl.textContent = 'Sync…'; statusEl.style.color = 'var(--gold)'; }
+  try {
+    // Réinstaller le bridge
+    lbBridgeReady = false;
+    await wv.executeJavaScript(LB_BRIDGE);
+    lbBridgeReady = true;
+    // Ré-injecter tout le draft courant
+    lbResetTracking();
+    await lbInjectDiff(draft);
+    if (statusEl) { statusEl.textContent = '✓ Bridge actif'; statusEl.style.color = 'var(--green)'; }
+  } catch (e) {
+    lbBridgeReady = false;
+    if (statusEl) { statusEl.textContent = '✗ Erreur sync'; statusEl.style.color = 'var(--red)'; }
+  }
+}
+
+// ─── Affichage de l'analyse Match Analysis de lol-brain ─────────────────────
+
+function showLbAnalysis(a) {
+  if (!a) return;
+  const block = document.getElementById('lbAnalysisBlock');
+  if (!block) return;
+  block.style.display = '';
+
+  // Ouvrir le panel si fermé
+  const panel = document.getElementById('lbAdvicePanel');
+  if (panel) panel.style.display = 'block';
+
+  // Win bar
+  const blueWin = a.blueWin || 50;
+  document.getElementById('lbWinBar').style.width = blueWin + '%';
+  document.getElementById('lbWinLabel').textContent =
+    `Bleu ${blueWin}%  ·  Rouge ${a.redWin || (100 - blueWin)}%`;
+
+  // Verdict
+  const conf = a.confidence ? ` (confiance ${a.confidence}%)` : '';
+  document.getElementById('lbVerdict').textContent = (a.verdict || '') + conf;
+
+  // Lanes
+  const laneEmoji = { Top:'🛡', Jungle:'🌲', Mid:'⚡', Adc:'🏹', Support:'💜' };
+  document.getElementById('lbLanes').innerHTML = (a.lanes || []).map(l => {
+    const isMine = l.team === 'Blue';
+    const color  = isMine ? 'var(--blue)' : 'var(--red,#e05252)';
+    return `<div style="display:flex;flex-direction:column;align-items:center;gap:2px;padding:4px 8px;background:var(--bg3);border-radius:6px;border:1px solid ${color}33;">
+      <span style="font-size:9px;color:var(--text-muted);font-family:var(--mono);">${laneEmoji[l.lane]||''}${l.lane}</span>
+      <span style="font-size:12px;font-weight:700;color:${color};">${l.pct}%</span>
+      <span style="font-size:8px;color:var(--text-muted);">${l.team}</span>
+    </div>`;
+  }).join('');
+
+  // Counterpicks : extraire best/worst du champData
+  let cpHtml = '';
+  if (a.champData) {
+    // Trouver les blocs "Best Matchups" et "Worst Matchups" par champion
+    const champEntries = parseChampBlocks(a.champData);
+    cpHtml = champEntries.map(c => `
+      <div style="margin-bottom:8px;">
+        <div style="font-size:11px;font-weight:700;color:var(--gold);margin-bottom:3px;">${c.name}</div>
+        ${c.best.length ? `<div style="color:var(--green,#52c41a);font-size:10px;">✓ Counter : ${c.best.join(', ')}</div>` : ''}
+        ${c.worst.length ? `<div style="color:var(--red,#e05252);font-size:10px;">✗ Counté par : ${c.worst.join(', ')}</div>` : ''}
+      </div>`).join('');
+  }
+  document.getElementById('lbCounterpicks').innerHTML = cpHtml ||
+    `<div style="font-size:10px;color:var(--text-muted);">${(a.champData||'').substring(0,300)}</div>`;
+}
+
+function parseChampBlocks(text) {
+  const results = [];
+  // Split par bloc champion (chaque champion commence avant "BLUE TEAM"/"RED TEAM")
+  const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
+  let current = null;
+  let mode = null; // 'best' | 'worst'
+
+  for (const line of lines) {
+    if (line === 'BLUE TEAM' || line === 'RED TEAM') { current = null; mode = null; continue; }
+    if (line.startsWith('Best Matchups')) { mode = 'best'; continue; }
+    if (line.startsWith('Worst Matchups')) { mode = 'worst'; continue; }
+    if (line.startsWith('Matchup Distribution') || line.startsWith('Winrate') || line.startsWith('Pickrate')) { mode = null; continue; }
+    if (line.startsWith('Champions that ') && line.includes(' counters')) {
+      const name = line.replace('Champions that ','').replace(' counters','').trim();
+      current = results.find(r => r.name === name);
+      if (!current) { current = { name, best:[], worst:[] }; results.push(current); }
+      mode = 'best'; continue;
+    }
+    if (line.startsWith('Champions that counter ')) {
+      const name = line.replace('Champions that counter ','').trim();
+      current = results.find(r => r.name === name);
+      if (!current) { current = { name, best:[], worst:[] }; results.push(current); }
+      mode = 'worst'; continue;
+    }
+    // Ligne avec un % = winrate → on ignore
+    if (/^\d+\.?\d*%$/.test(line)) continue;
+    // Ligne avec un nom de champion potentiel
+    if (current && mode && line.length > 2 && line.length < 30 && /^[A-Z']/.test(line)) {
+      if (mode === 'best' && current.best.length < 3) current.best.push(line);
+      if (mode === 'worst' && current.worst.length < 3) current.worst.push(line);
+    }
+  }
+  return results.filter(r => r.best.length || r.worst.length);
+}
+
+function openLbAdvice() {
+  const panel = document.getElementById('lbAdvicePanel');
+  if (panel) panel.style.display = 'block';
+  // Si on a déjà une analyse, l'afficher
+  if (lastLbAnalysis) showLbAnalysis(lastLbAnalysis);
+  askClaudeForPick();
+}
+
+function closeLbAdvice() {
+  const panel = document.getElementById('lbAdvicePanel');
+  if (panel) panel.style.display = 'none';
+}
+
+// ─── lol-brain Bridge ──────────────────────────────────────────────────────
+// Bridge injecté dans la webview lol-brain v4 — injection via input search uniquement
+// (le clic JS sur les slots React ne fonctionne pas ; seul l'input + clic bouton marche)
+const LB_BRIDGE = `
+(function() {
+  if (window.__forge && window.__forge.v === 4) return;
+  const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+  /* ── 1. Passer en mode "Blue First" (blue[0..4] puis red[0..4]) ── */
+  function setPickOrder() {
+    const sel = document.querySelector('select');
+    if (!sel) return;
+    const nativeSetter = Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype, 'value').set;
+    nativeSetter.call(sel, 'first_blue');
+    sel.dispatchEvent(new Event('change', { bubbles: true }));
+  }
+
+  /* ── 2. Reset du draft ── */
+  function resetDraft() {
+    const btn = [...document.querySelectorAll('button')].find(b =>
+      b.textContent.trim().toLowerCase().includes('reset'));
+    if (btn) btn.click();
+  }
+
+  /* ── 3. Injecter un champion via input search (mécanisme confirmé fonctionnel) ── */
+  async function injectChampion(name) {
+    const inp = document.querySelector('input[placeholder="ex. Garen"]');
+    if (!inp) { console.warn('[FORGE] Input introuvable'); return false; }
+
+    const setter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set;
+    setter.call(inp, name);
+    inp.dispatchEvent(new Event('input', { bubbles: true }));
+    await sleep(700);
+
+    const norm = s => (s || '').toLowerCase().replace(/[' ]/g, '');
+    const target = norm(name);
+
+    // Trouver le bouton champion dans la grille filtrée
+    const btn = [...document.querySelectorAll('button img')]
+      .filter(img => norm(img.alt) === target)
+      .map(img => img.closest('button'))
+      .filter(b => b && b.getBoundingClientRect().y > 100)[0];
+
+    // Vider l'input
+    setter.call(inp, '');
+    inp.dispatchEvent(new Event('input', { bubbles: true }));
+
+    if (btn) { btn.click(); await sleep(400); return true; }
+    console.warn('[FORGE] Champion introuvable:', name);
+    return false;
+  }
+
+  /* ── 4. Compter les slots remplis (côté blue x≈256, côté red x≈1600) ── */
+  function countFilledSlots() {
+    return [...document.querySelectorAll('div.w-16')].filter(d => {
+      if (!d.className.includes('h-16')) return false;
+      const r = d.getBoundingClientRect();
+      return (r.x > 100 && r.x < 400) || r.x > 1300;
+    }).filter(d => d.querySelector('img[alt]')).length;
+  }
+
+  /* ── 5. Analyse automatique quand 10 picks remplis ── */
+  async function tryAnalyzeDraft() {
+    if (window.__forge.analyzed) return;
+    if (countFilledSlots() < 10) return;
+    const analyzeBtn = [...document.querySelectorAll('button')]
+      .find(b => b.textContent.trim().toLowerCase().includes('analyze') && !b.disabled);
+    if (!analyzeBtn) return;
+    window.__forge.analyzed = true;
+    analyzeBtn.click();
+    await sleep(6000);
+    const a = extractMatchAnalysis();
+    if (a) console.log('[FORGE_ANALYSIS]' + JSON.stringify(a));
+  }
+
+  function extractMatchAnalysis() {
+    const text = document.body.innerText;
+    const idx = text.indexOf('Match Analysis');
+    if (idx < 0) return null;
+    const block = text.substring(idx, idx + 8000);
+    const winMatch = block.match(/Blue Team:\\s*([\\d.]+)%[\\s\\S]*?Red Team:\\s*([\\d.]+)%/);
+    const verdict  = block.match(/(Strong|Slight|Even)[^\\n]+/)?.[0] || '';
+    const conf     = block.match(/([\\d]+)%\\s*\\n.*Confidence/)?.[1] || '';
+    const laneNames = ['Top','Jungle','Mid','Adc','Support'];
+    const laneMatches = [...block.matchAll(/([\\d.]+)%\\s+for\\s+(Blue|Red)/g)];
+    const lanes = laneMatches.slice(0, 5).map((m, i) => ({
+      lane: laneNames[i] || ('Lane' + i), pct: parseFloat(m[1]), team: m[2]
+    }));
+    const champIdx = block.indexOf('Champion Trends');
+    const champSection = champIdx >= 0 ? block.substring(champIdx, champIdx + 4000) : '';
+    const nameWrPairs = [...champSection.matchAll(/([A-Z][a-zA-Z' .]+)\\n([\\d.]+)%/g)]
+      .map(m => ({ name: m[1].trim(), wr: parseFloat(m[2]) }))
+      .filter(x => x.wr > 30 && x.wr < 70);
+    return {
+      blueWin: winMatch ? parseFloat(winMatch[1]) : null,
+      redWin:  winMatch ? parseFloat(winMatch[2]) : null,
+      verdict, confidence: conf, lanes,
+      champData: champSection.trim().substring(0, 4000),
+      matchupPairs: nameWrPairs.slice(0, 30)
+    };
+  }
+
+  /* ── 6. Queue séquentielle ── */
+  window.__forge = { queue: [], busy: false, v: 4, analyzed: false };
+
+  async function process() {
+    if (window.__forge.busy) return;
+    window.__forge.busy = true;
+    while (window.__forge.queue.length) {
+      const item = window.__forge.queue.shift();
+      try {
+        if (item.action === 'reset') {
+          window.__forge.analyzed = false;
+          setPickOrder();
+          await sleep(300);
+          resetDraft();
+          await sleep(600);
+        } else if (item.champion) {
+          await injectChampion(item.champion);
+        }
+      } catch(e) { console.warn('[FORGE] Err:', e.message); }
+    }
+    window.__forge.busy = false;
+    tryAnalyzeDraft();
+  }
+
+  window.addEventListener('forge-inject', e => {
+    window.__forge.queue.push(e.detail);
+    process();
+  });
+
+  // Init : mode Blue First dès le chargement
+  setPickOrder();
+  console.log('[FORGE] Bridge lol-brain v4 installé');
+})();
+`;
+
+// Dernier état envoyé à lol-brain (pour calculer le diff)
+let lastLbDraft = { bluePicks:[], redPicks:[], blueBans:[], redBans:[] };
+let lbBridgeReady = false;
+let lastLbAnalysis = null; // Dernière analyse Match Analysis extraite
+
+function lbKey(champ) { return champ ? champ.name : null; }
+
+// Envoie un event forge-inject à la webview lol-brain
+async function lbDispatch(wv, detail) {
+  await wv.executeJavaScript(
+    'window.dispatchEvent(new CustomEvent(\'forge-inject\', { detail: ' + JSON.stringify(detail) + ' }))'
+  ).catch(() => {});
+}
+
+// À chaque nouveau pick : reset lol-brain + ré-injection complète en ordre blue[0..4] red[0..4]
+// (first_blue mode : lol-brain avance automatiquement au slot suivant à chaque champion injecté)
+async function lbInjectDiff(newDraft) {
+  if (!lbBridgeReady) return;
+  const wv = document.getElementById('lolbrainWebview');
+  if (!wv || !IS_ELECTRON) return;
+
+  // Vérifier s'il y a au moins un pick nouveau
+  const hasChange =
+    newDraft.bluePicks.some((c, i) => lbKey(c) !== lbKey(lastLbDraft.bluePicks[i])) ||
+    newDraft.redPicks.some((c, i)  => lbKey(c) !== lbKey(lastLbDraft.redPicks[i]));
+  if (!hasChange) return;
+
+  // 1. Reset (remet le board à zéro + confirme pick order first_blue)
+  await lbDispatch(wv, { action: 'reset' });
+
+  // 2. Blue picks 0→4 dans l'ordre
+  for (let i = 0; i < 5; i++) {
+    if (newDraft.bluePicks[i]) await lbDispatch(wv, { champion: newDraft.bluePicks[i].name });
+  }
+  // 3. Red picks 0→4 dans l'ordre
+  for (let i = 0; i < 5; i++) {
+    if (newDraft.redPicks[i]) await lbDispatch(wv, { champion: newDraft.redPicks[i].name });
+  }
+
+  lastLbDraft = {
+    bluePicks: [...newDraft.bluePicks],
+    redPicks:  [...newDraft.redPicks],
+    blueBans:  [...newDraft.blueBans],
+    redBans:   [...newDraft.redBans],
+  };
+}
+
+// Réinitialise lol-brain quand une nouvelle draft commence
+async function lbResetRemote() {
+  const wv = document.getElementById('lolbrainWebview');
+  if (!wv || !IS_ELECTRON || !lbBridgeReady) return;
+  await lbDispatch(wv, { action: 'reset' });
+}
+
+// Réinitialise le tracking quand une nouvelle session de draft commence
+function lbResetTracking() {
+  lastLbDraft  = { bluePicks:[], redPicks:[], blueBans:[], redBans:[] };
+  lastLbAnalysis = null;
+  const block = document.getElementById('lbAnalysisBlock');
+  if (block) block.style.display = 'none';
+}
+
+function initLolbrainWebview() {
+  if (!IS_ELECTRON) return;
+  const wv = document.getElementById('lolbrainWebview');
+  if (!wv) return;
+  const statusEl = document.getElementById('lolbrainStatus');
+
+  // Installer le bridge après chaque chargement de page
+  wv.addEventListener('dom-ready', async () => {
+    lbBridgeReady = false;
+    if (statusEl) { statusEl.textContent = 'Connecté'; statusEl.style.color = 'var(--green)'; }
+    try {
+      await wv.executeJavaScript(LB_BRIDGE);
+      lbBridgeReady = true;
+      lbResetTracking(); // nouvelle page = on repart de zéro
+      if (statusEl) { statusEl.textContent = '✓ Bridge actif'; statusEl.style.color = 'var(--green)'; }
+    } catch(e) {
+      if (statusEl) { statusEl.textContent = '⚠ Bridge échoué'; statusEl.style.color = 'var(--gold)'; }
+    }
+  });
+
+  wv.addEventListener('did-start-loading', () => {
+    lbBridgeReady = false;
+    if (statusEl) { statusEl.textContent = 'Chargement…'; statusEl.style.color = 'var(--text-muted)'; }
+  });
+
+  wv.addEventListener('did-fail-load', (e) => {
+    if (e.errorCode === -3) return;
+    lbBridgeReady = false;
+    if (statusEl) { statusEl.textContent = '✗ Erreur'; statusEl.style.color = 'var(--red)'; }
+  });
+
+  // Mettre à jour le bouton actif selon l'URL courante
+  const syncActiveBtn = (url) => {
+    document.querySelectorAll('[id^="lb-btn-"]').forEach(b => b.classList.remove('active'));
+    const section = LB_SECTIONS.find(s => url.includes(`lol-brain.com/${s}`)) || 'draft';
+    document.getElementById(`lb-btn-${section}`)?.classList.add('active');
+  };
+  wv.addEventListener('did-navigate', (e) => syncActiveBtn(e.url || ''));
+  wv.addEventListener('did-navigate-in-page', (e) => syncActiveBtn(e.url || ''));
+
+  // Recevoir l'analyse Match Analysis depuis le bridge (via console.log)
+  wv.addEventListener('console-message', (e) => {
+    const msg = e.message || '';
+    if (!msg.startsWith('[FORGE_ANALYSIS]')) return;
+    try {
+      const analysis = JSON.parse(msg.replace('[FORGE_ANALYSIS]', ''));
+      lastLbAnalysis = analysis;
+      showLbAnalysis(analysis);
+    } catch {}
+  });
+}
+
+// ─── Extraction du contexte lol-brain ────────────────────────────────────────
+// Lit le contenu visible de la webview pour alimenter la recommandation Claude
+
+async function extractLolbrainContext() {
+  const wv = document.getElementById('lolbrainWebview');
+  if (!wv || !IS_ELECTRON) return null;
+  try {
+    const result = await wv.executeJavaScript(`
+      (function() {
+        // 1. Essayer __NEXT_DATA__ (Next.js)
+        const nd = document.getElementById('__NEXT_DATA__');
+        let nextData = null;
+        if (nd) {
+          try {
+            const p = JSON.parse(nd.textContent);
+            // Extraire les clés utiles (champions suggérés, tiers, scores)
+            const pp = p?.props?.pageProps;
+            nextData = JSON.stringify(pp || p?.props || {}).substring(0, 3000);
+          } catch {}
+        }
+
+        // 2. Texte visible des zones clés de la page
+        const selectors = [
+          'main', 'article', '[class*="draft"]', '[class*="Draft"]',
+          '[class*="recommend"]', '[class*="champion"]', '[class*="pick"]',
+          '[class*="tier"]', '[class*="score"]', '[class*="suggestion"]'
+        ];
+        let visible = '';
+        for (const sel of selectors) {
+          const els = document.querySelectorAll(sel);
+          for (const el of els) {
+            const t = el.innerText?.trim();
+            if (t && t.length > 20 && t.length < 4000) {
+              visible += t.substring(0, 800) + '\\n---\\n';
+              if (visible.length > 3000) break;
+            }
+          }
+          if (visible.length > 3000) break;
+        }
+
+        // 3. Fallback : texte du body
+        if (!visible && !nextData) {
+          visible = document.body?.innerText?.substring(0, 2000) || '';
+        }
+
+        return { nextData, visible: visible.substring(0, 3000) };
+      })()
+    `);
+    return result;
+  } catch { return null; }
+}
+
+// ─── Recommandation de pick ───────────────────────────────────────────────────
+
+async function askClaudeForPick() {
+  const pool = document.getElementById('champPool')?.value.trim() || '';
+  const allies = draft.bluePicks.filter(Boolean).map(c => c.name);
+  const enemies = draft.redPicks.filter(Boolean).map(c => c.name);
+  const bans = [...draft.blueBans, ...draft.redBans].filter(Boolean).map(c => c.name);
+  const bannedNames = new Set(bans);
+  const filteredStats = playerChampStats?.filter(c => !bannedNames.has(c.name));
+
+  // Ouvrir le panneau
+  const panel = document.getElementById('lbAdvicePanel');
+  if (panel) panel.style.display = 'block';
+  const btn = document.getElementById('lolbrainPickBtn');
+  if (btn) { btn.disabled = true; btn.innerHTML = '<div class="spinner"></div>'; }
+
+  setAdvicePhase(1, 'Analyse lol-brain + pool…');
+  document.getElementById('draftAdvice').className = 'advice-text muted';
+  document.getElementById('draftAdvice').textContent = 'Lecture de lol-brain…';
+  document.getElementById('runeSpellSection').style.display = 'none';
+
+  // Utiliser l'analyse lol-brain déjà extraite, ou la relire si dispo
+  let lbSection = '';
+  const ana = lastLbAnalysis || await extractLolbrainContext().then(ctx => null);
+  if (lastLbAnalysis) {
+    const a = lastLbAnalysis;
+    lbSection =
+      `**Analyse lol-brain.com** :\n` +
+      (a.blueWin ? `— Win probability : Bleu ${a.blueWin}% / Rouge ${a.redWin}%\n` : '') +
+      (a.verdict  ? `— Verdict : ${a.verdict}\n` : '') +
+      (a.lanes?.length ? `— Lanes : ${a.lanes.map(l=>`${l.lane}=${l.pct}% ${l.team}`).join(', ')}\n` : '') +
+      (a.champData ? `— Données champion (counterpicks/counters) :\n${a.champData.substring(0, 1500)}\n` : '') +
+      '\n';
+  } else {
+    // Fallback : lire le texte visible
+    const lbCtx = await extractLolbrainContext();
+    if (lbCtx?.visible) lbSection = `**Contexte lol-brain.com** :\n${lbCtx.visible.substring(0, 1500)}\n\n`;
+  }
+
+  const statsLine = filteredStats?.length
+    ? `**Mes stats récentes** : ${filteredStats.slice(0, 6).map(c => `${c.name} ${c.wr}%WR/${c.games}g`).join(', ')}\n`
+    : '';
+
+  document.getElementById('draftAdvice').textContent = 'Génération en cours…';
+
+  try {
+    const text = await claudeComplete(
+      `Tu es un coach LoL Diamond+. Le joueur demande quel champion jouer depuis son pool.\n\n` +
+      lbSection +
+      `**Rôle** : ${myRole}\n` +
+      `**Mon pool** : ${pool || 'non renseigné'}\n` +
+      statsLine +
+      `**Alliés déjà pickés** : ${allies.join(', ') || 'aucun'}\n` +
+      `**Ennemis** : ${enemies.join(', ') || 'aucun'}\n` +
+      `**Bans** : ${bans.join(', ') || 'aucun'}\n\n` +
+      `Consigne : utilise les données lol-brain pour orienter ta recommandation (tier, matchup, synergies méta). ` +
+      `Recommande 2-3 champions de MON POOL. Pour chacun : 1 ligne "pourquoi", 1 ligne "comment jouer". ` +
+      `Si lol-brain suggère un champion hors de mon pool qui est clairement optimal, signale-le. ` +
+      `Sois direct. Réponds en français.`
+    );
+    document.getElementById('draftAdvice').className = 'advice-text';
+    document.getElementById('draftAdvice').innerHTML = text.replace(/\n/g, '<br>').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+    document.getElementById('adviceMeta').textContent = new Date().toLocaleTimeString('fr-FR', { hour:'2-digit', minute:'2-digit' });
+    notifyAdvice('lolbrain', '#lbAdvicePanel', 'Recommandation pick', text);
+    ttsAutoSpeak('draft', text);
+  } catch(e) {
+    document.getElementById('draftAdvice').className = 'advice-text muted';
+    document.getElementById('draftAdvice').textContent = 'Erreur : ' + (e?.message || e);
+  }
+  if (btn) { btn.disabled = false; btn.innerHTML = '★ Mon pick idéal'; }
+}
+
+// L'onglet lol-brain est actif par défaut → mode plein écran
+document.querySelector('main').classList.add('fullscreen');
+
+renderBoard();
+init();
+ttsInit();
+initLolbrainWebview();
+renderDebriefsHistory();
+renderDebriefHistory(); // historique unifié des debriefs liés à l'historique LCU
+</script>
+</body>
+</html>

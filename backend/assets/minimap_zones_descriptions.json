@@ -1,0 +1,370 @@
+{
+    "baron_pit": {
+	    		"type": "objective",
+			"description_sw": {"fr": "baron pit"},
+			"description_ne": {"fr": "baron pit"}
+    },
+    "dragon_pit": {
+	    		"type": "objective",
+			"description_sw": {"fr": "dragon pit"},
+			"description_ne": {"fr": "dragon pit"}
+    },
+
+    "base_north_east": {
+	    			"type": "base",
+				"description_sw": {"fr": "base ennemie"},
+				"description_ne": {"fr": "base alliée"}
+    },
+    "base_north_east_spawn": {
+	    			"type": "spawn",
+				"description_sw": {"fr": "spawn ennemi"},
+				"description_ne": {"fr": "spawn allié"}
+    },
+    "base_south_west": {
+	    			"type": "base",
+				"description_sw": {"fr": "base alliée"},
+				"description_ne": {"fr": "base ennemie"}
+    },
+    "base_south_west_spawn": {
+	    			"type": "spawn",
+				"description_sw": {"fr": "spawn allié"},
+				"description_ne": {"fr": "spawn ennemi"}
+    },
+
+    "botlane_mid_bush": {
+	    			"type": "lane",
+				"description_sw": {"fr": "petit chemin qui passe derrière le rocher au milieu de la botlane"},
+				"description_ne": {"fr": "petit chemin qui passe derrière le rocher au milieu de la botlane"}
+    },
+    "botlane_mid_north_east": {
+	    			"type": "lane",
+				"description_sw": {"fr": "coté ennemi du milieu de la botlane"},
+				"description_ne": {"fr": "coté allié du milieu de la botlane"}
+    },
+    "botlane_mid_south_west": {
+	    			"type": "lane",
+				"description_sw": {"fr": "coté allié du milieu de la botlane"},
+				"description_ne": {"fr": "coté ennemi du milieu de la botlane"}
+    },
+    "botlane_north_east": {
+	    			"type": "lane",
+				"description_sw": {"fr": "coté ennemi de la botlane"},
+				"description_ne": {"fr": "coté allié de la botlane"}
+    },
+    "botlane_south_west": {
+	    			"type": "lane",
+				"description_sw": {"fr": "coté allié de la botlane"},
+				"description_ne": {"fr": "coté ennemi de la botlane"}
+    },
+    "midlane_mid_north_east": {
+	    			"type": "lane",
+				"description_sw": {"fr": "coté ennemi du milieu de la midlane"},
+				"description_ne": {"fr": "coté allié du milieu de la midlane"}
+    },
+    "midlane_mid_south_west": {
+	    			"type": "lane",
+				"description_sw": {"fr": "coté allié du milieu de la midlane"},
+				"description_ne": {"fr": "coté ennemi du milieu de la midlane"}
+    },
+    "midlane_north_east": {
+	    			"type": "lane",
+				"description_sw": {"fr": "coté ennemi de la midlane"},
+				"description_ne": {"fr": "coté allié de la midlane"}
+    },
+    "midlane_south_west": {
+	    			"type": "lane",
+				"description_sw": {"fr": "coté allié de la midlane"},
+				"description_ne": {"fr": "coté ennemi de la midlane"}
+    },
+    "toplane_mid_bush": {
+	    			"type": "lane",
+				"description_sw": {"fr": "petit chemin qui passe derrière le rocher au milieu de la toplane"},
+				"description_ne": {"fr": "petit chemin qui passe derrière le rocher au milieu de la toplane"}
+    },
+    "toplane_mid_north_east": {
+	    			"type": "lane",
+				"description_sw": {"fr": "coté ennemi du milieu de la toplane"},
+				"description_ne": {"fr": "coté allié du milieu de la toplane"}
+    },
+    "toplane_mid_south_west": {
+	    			"type": "lane",
+				"description_sw": {"fr": "coté allié du milieu de la toplane"},
+				"description_ne": {"fr": "coté ennemi du milieu de la toplane"}
+    },
+    "toplane_north_east": {
+	    			"type": "lane",
+				"description_sw": {"fr": "coté ennemi de la toplane"},
+				"description_ne": {"fr": "coté allié de la toplane"}
+    },
+    "toplane_south_west": {
+	    			"type": "lane",
+				"description_sw": {"fr": "coté allié de la toplane"},
+				"description_ne": {"fr": "coté ennemi de la toplane"}
+    },
+
+    "botlane_t1_north_east": {
+	    			"type": "turret",
+				"description_sw": {"fr": "T1 ennemie de la botlane"},
+				"description_ne": {"fr": "T1 alliée de la botlane"}
+    },
+    "botlane_t1_south_west": {
+	    			"type": "turret",
+				"description_sw": {"fr": "T1 alliée de la botlane"},
+				"description_ne": {"fr": "T1 ennemie de la botlane"}
+    },
+    "botlane_t2_north_east": {
+	    			"type": "turret",
+				"description_sw": {"fr": "T2 ennemie de la botlane"},
+				"description_ne": {"fr": "T2 alliée de la botlane"}
+    },
+    "botlane_t2_south_west": {
+	    			"type": "turret",
+				"description_sw": {"fr": "T2 alliée de la botlane"},
+				"description_ne": {"fr": "T2 ennemie de la botlane"}
+    },
+    "botlane_t3_north_east": {
+	    			"type": "turret",
+				"description_sw": {"fr": "T3 ennemie de la botlane"},
+				"description_ne": {"fr": "T3 alliée de la botlane"}
+    },
+    "botlane_t3_south_west": {
+	    			"type": "turret",
+				"description_sw": {"fr": "T3 alliée de la botlane"},
+				"description_ne": {"fr": "T3 ennemie de la botlane"}
+    },
+    "botlane_t4_north_east": {
+	    			"type": "turret",
+				"description_sw": {"fr": "T4 ennemie"},
+				"description_ne": {"fr": "T4 alliée"}
+    },
+    "botlane_t4_south_west": {
+	    			"type": "turret",
+				"description_sw": {"fr": "T4 alliée"},
+				"description_ne": {"fr": "T4 ennemie"}
+    },
+    "midlane_t1_north_east": {
+	    			"type": "turret",
+				"description_sw": {"fr": "T1 ennemie de la midlane"},
+				"description_ne": {"fr": "T1 alliée de la midlane"}
+    },
+    "midlane_t1_south_west": {
+	    			"type": "turret",
+				"description_sw": {"fr": "T1 alliée de la midlane"},
+				"description_ne": {"fr": "T1 ennemie de la midlane"}
+    },
+    "midlane_t2_north_east": {
+	    			"type": "turret",
+				"description_sw": {"fr": "T2 ennemie de la midlane"},
+				"description_ne": {"fr": "T2 alliée de la midlane"}
+    },
+    "midlane_t2_south_west": {
+	    			"type": "turret",
+				"description_sw": {"fr": "T2 alliée de la midlane"},
+				"description_ne": {"fr": "T2 ennemie de la midlane"}
+    },
+    "midlane_t3_north_east": {
+	    			"type": "turret",
+				"description_sw": {"fr": "T3 ennemie de la midlane"},
+				"description_ne": {"fr": "T3 alliée de la midlane"}
+    },
+    "midlane_t3_south_west": {
+	    			"type": "turret",
+				"description_sw": {"fr": "T3 alliée de la midlane"},
+				"description_ne": {"fr": "T3 ennemie de la midlane"}
+    },
+    "toplane_t1_north_east": {
+	    			"type": "turret",
+				"description_sw": {"fr": "T1 ennemie de la toplane"},
+				"description_ne": {"fr": "T1 alliée de la toplane"}
+    },
+    "toplane_t1_south_west": {
+	    			"type": "turret",
+				"description_sw": {"fr": "T1 alliée de la toplane"},
+				"description_ne": {"fr": "T1 ennemie de la toplane"}
+    },
+    "toplane_t2_north_east": {
+	    			"type": "turret",
+				"description_sw": {"fr": "T2 ennemie de la toplane"},
+				"description_ne": {"fr": "T2 alliée de la toplane"}
+    },
+    "toplane_t2_south_west": {
+	    			"type": "turret",
+				"description_sw": {"fr": "T2 alliée de la toplane"},
+				"description_ne": {"fr": "T2 ennemie de la toplane"}
+    },
+    "toplane_t3_north_east": {
+	    			"type": "turret",
+				"description_sw": {"fr": "T3 ennemie de la toplane"},
+				"description_ne": {"fr": "T3 alliée de la toplane"}
+    },
+    "toplane_t3_south_west": {
+	    			"type": "turret",
+				"description_sw": {"fr": "T3 alliée de la toplane"},
+				"description_ne": {"fr": "T3 ennemie de la toplane"}
+    },
+    "toplane_t4_north_east": {
+	    			"type": "turret",
+				"description_sw": {"fr": "T4 ennemie"},
+				"description_ne": {"fr": "T4 alliée"}
+    },
+    "toplane_t4_south_west": {
+	    			"type": "turret",
+				"description_sw": {"fr": "T4 alliée"},
+				"description_ne": {"fr": "T4 ennemie"}
+    },
+
+    "inhib_north_east_bot": {
+	    			"type": "inhibitor",
+				"description_sw": {"fr": "Inhibiteur ennemi de la botlane"},
+				"description_ne": {"fr": "Inhibiteur allié de la botlane"}
+    },
+    "inhib_north_east_mid": {
+	    			"type": "inhibitor",
+				"description_sw": {"fr": "Inhibiteur ennemi de la midlane"},
+				"description_ne": {"fr": "Inhibiteur allié de la midlane"}
+    },
+    "inhib_north_east_top": {
+	    			"type": "inhibitor",
+				"description_sw": {"fr": "Inhibiteur ennemi de la toplane"},
+				"description_ne": {"fr": "Inhibiteur allié de la toplane"}
+    },
+    "base_north_east_inhib": {
+	    			"type": "inhibitor",
+				"description_sw": {"fr": "nexus ennemi"},
+				"description_ne": {"fr": "nexus allié"}
+    },
+    "inhib_south_west_bot": {
+	    			"type": "inhibitor",
+				"description_sw": {"fr": "Inhibiteur allié de la botlane"},
+				"description_ne": {"fr": "Inhibiteur ennemi de la botlane"}
+    },
+    "inhib_south_west_mid": {
+	    			"type": "inhibitor",
+				"description_sw": {"fr": "Inhibiteur allié de la midlane"},
+				"description_ne": {"fr": "Inhibiteur ennemi de la midlane"}
+    },
+    "inhib_south_west_top": {
+	    			"type": "inhibitor",
+				"description_sw": {"fr": "Inhibiteur allié de la toplane"},
+				"description_ne": {"fr": "Inhibiteur ennemi de la toplane"}
+    },
+    "base_south_west_inhib": {
+	    			"type": "inhibitor",
+				"description_sw": {"fr": "nexus allié"},
+				"description_ne": {"fr": "nexus ennemi"}
+    },
+
+    "jungle_north": {
+	    			"type": "jungle",
+				"description_sw": {"fr": "jungle ennemie top"},
+				"description_ne": {"fr": "jungle alliée top"}
+    },
+    "jungle_south": {
+	    			"type": "jungle",
+				"description_sw": {"fr": "jungle alliée bot"},
+				"description_ne": {"fr": "jungle ennemie bot"}
+    },
+    "jungle_east": {
+	    			"type": "jungle",
+				"description_sw": {"fr": "jungle ennemie bot"},
+				"description_ne": {"fr": "jungle alliée bot"}
+    },
+    "jungle_west": {
+	    			"type": "jungle",
+				"description_sw": {"fr": "jungle alliée top"},
+				"description_ne": {"fr": "jungle ennemie top"}
+    },
+
+    "jungle_east_blue_camp": {
+	    			"type": "jungle_camp",
+				"description_sw": {"fr": "blue de la jungle ennemie bot"},
+				"description_ne": {"fr": "blue de la jungle alliée bot"}
+    },
+    "jungle_east_gromp_camp": {
+	    			"type": "jungle_camp",
+				"description_sw": {"fr": "gromp de la jungle ennemie bot"},
+				"description_ne": {"fr": "gromp de la jungle alliée bot"}
+    },
+    "jungle_east_wolves_camp": {
+	    			"type": "jungle_camp",
+				"description_sw": {"fr": "wolves de la jungle ennemie bot"},
+				"description_ne": {"fr": "wolves de la jungle alliée bot"}
+    },
+    "jungle_north_krugs_camp": {
+	    			"type": "jungle_camp",
+				"description_sw": {"fr": "krugs de la jungle ennemie top"},
+				"description_ne": {"fr": "krugs de la jungle allié top"}
+    },
+    "jungle_north_razorbeaks_camp": {
+	    			"type": "jungle_camp",
+				"description_sw": {"fr": "raptor de la jungle ennemie top"},
+				"description_ne": {"fr": "raptor de la jungle allié top"}
+    },
+    "jungle_north_red_camp": {
+	    			"type": "jungle_camp",
+				"description_sw": {"fr": "red de la jungle ennemie top"},
+				"description_ne": {"fr": "red de la jungle allié top"}
+    },
+    "jungle_south_krugs_camp": {
+	    			"type": "jungle_camp",
+				"description_sw": {"fr": "krugs de la jungle alliée bot"},
+				"description_ne": {"fr": "krugs de la jungle ennemie bot"}
+    },
+    "jungle_south_razorbeaks_camp": {
+	    			"type": "jungle_camp",
+				"description_sw": {"fr": "raptor de la jungle alliée bot"},
+				"description_ne": {"fr": "raptor de la jungle ennemie bot"}
+    },
+    "jungle_south_red_camp": {
+	    			"type": "jungle_camp",
+				"description_sw": {"fr": "red de la jungle alliée bot"},
+				"description_ne": {"fr": "red de la jungle ennemie bot"}
+    },
+    "jungle_west_blue_camp": {
+	    			"type": "jungle_camp",
+				"description_sw": {"fr": "blue de la jungle alliée top"},
+				"description_ne": {"fr": "blue de la jungle ennemie top"}
+    },
+    "jungle_west_gromp_camp": {
+	    			"type": "jungle_camp",
+				"description_sw": {"fr": "gromp de la jungle alliée top"},
+				"description_ne": {"fr": "gromp de la jungle ennemie top"}
+    },
+    "jungle_west_wolves_camp": {
+	    			"type": "jungle_camp",
+				"description_sw": {"fr": "wolves de la jungle alliée top"},
+				"description_ne": {"fr": "wolves de la jungle ennemie top"}
+    },
+
+    "north_east_base_to_east_jungle": {
+	    			"type": "corridor",
+				"description_sw": {"fr": "couloir entre la base ennemie et la jungle ennemie bot"},
+				"description_ne": {"fr": "couloir entre la base alliée et la jungle alliée bot"}
+    },
+    "north_east_base_to_north_jungle": {
+	    			"type": "corridor",
+				"description_sw": {"fr": "couloir entre la base ennemie et la jungle ennemie top"},
+				"description_ne": {"fr": "couloir entre la base alliée et la jungle alliée top"}
+    },
+    "south_west_base_to_south_jungle": {
+	    			"type": "corridor",
+				"description_sw": {"fr": "couloir entre la base alliée et la jungle alliée bot"},
+				"description_ne": {"fr": "couloir entre la base ennemie et la jungle alliée bot"}
+    },
+    "south_west_base_to_west_jungle": {
+	    			"type": "corridor",
+				"description_sw": {"fr": "couloir entre la base alliée et la jungle alliée top"},
+				"description_ne": {"fr": "couloir entre la base ennemie et la jungle alliée top"}
+    },
+
+    "river_north_west": {
+	    			"type": "river",
+				"description_sw": {"fr": "rivière top"},
+				"description_ne": {"fr": "rivière top"}
+    },
+    "river_south_east": {
+	    			"type": "river",
+				"description_sw": {"fr": "rivière bot"},
+				"description_ne": {"fr": "rivière bot"}
+    }
+}

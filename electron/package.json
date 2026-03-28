@@ -1,0 +1,49 @@
+{
+  "name": "coach-carter-lol",
+  "version": "1.0.0",
+  "description": "Coach Carter LoL - AI Voice Coach for League of Legends",
+  "main": "dist-electron/main.js",
+  "type": "module",
+  "scripts": {
+    "dev":            "concurrently \"npm run dev:frontend\" \"npm run dev:electron\"",
+    "dev:frontend":   "vite --config ../frontend/vite.config.ts",
+    "dev:electron":   "wait-on http://localhost:5173 && electron .",
+    "build":          "npm run build:frontend && npm run build:electron",
+    "build:frontend": "cd ../frontend && npm run build",
+    "build:electron": "tsc -p tsconfig.json",
+    "dist":           "electron-builder"
+  },
+  "dependencies": {
+    "electron-store":   "^8.2.0",
+    "electron-updater": "^6.2.1"
+  },
+  "devDependencies": {
+    "concurrently":    "^8.2.2",
+    "electron":        "^31.0.0",
+    "electron-builder": "^24.13.3",
+    "typescript":      "^5.4.5",
+    "wait-on":         "^7.2.0"
+  },
+  "build": {
+    "appId":       "gg.coachcarter.lol",
+    "productName": "Coach Carter LoL",
+    "directories": { "output": "dist" },
+    "files": [
+      "dist-electron/**",
+      "splash.html"
+    ],
+    "extraResources": [
+      { "from": "../frontend/dist", "to": "dist" },
+      { "from": "../backend", "to": "backend", "filter": ["**/*", "!__pycache__", "!*.pyc", "!dist"] }
+    ],
+    "win": {
+      "target": "nsis",
+      "icon":   "resources/icon.ico"
+    },
+    "publish": {
+      "provider": "github",
+      "owner":    "OWNER_PLACEHOLDER",
+      "repo":     "coach-carter.lol"
+    }
+  }
+}

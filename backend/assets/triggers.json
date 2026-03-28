@@ -1,0 +1,558 @@
+{
+    "TOP": {
+        "creepscore_alert": {
+            "first_cooldown": 270,
+            "cooldown": 420,
+            "expiration": 1000000,
+            "blockers": ["is_player_in_teamfight", "is_late_game", "is_allied_base_collapsing"]
+        },
+        "ward_score_alert": {
+            "first_cooldown": 0,
+            "cooldown": 360,
+            "expiration": 1000000,
+            "blockers": ["is_player_in_teamfight", "is_late_game", "is_allied_base_collapsing"]
+        },
+        "back_alert": {
+            "first_cooldown": 0,
+            "cooldown": 60,
+            "expiration": 1000000,
+            "blockers": ["is_player_in_teamfight", "is_not_enough_gold_for_back"]
+        },
+        "global_strategic_advice": {
+            "first_cooldown": 300,
+            "cooldown": 300,
+            "expiration": 1000000,
+            "blockers": ["is_player_in_teamfight", "is_allied_base_collapsing"]
+        },
+        "death_advice": {
+            "first_cooldown": 0,
+            "cooldown": 210,
+            "expiration": 1000000,
+            "blockers": ["is_any_build_completed"]
+        },
+        "dragon_death_advice": {
+            "first_cooldown": 0,
+            "cooldown": 300,
+            "expiration": 1000000,
+            "blockers": ["is_player_in_teamfight", "is_last_objective_death_advice_recent", "is_allied_base_collapsing"]
+        },
+        "herald_death_advice": {
+            "first_cooldown": 0,
+            "cooldown": 1000000,
+            "expiration": 1000000,
+            "blockers": ["is_player_in_teamfight"]
+        },
+        "baron_death_advice": {
+            "first_cooldown": 0,
+            "cooldown": 360,
+            "expiration": 1000000,
+            "blockers": ["is_player_in_teamfight"]
+        },
+        "first_turret_killed_on_lane_advice": {
+            "first_cooldown": 0,
+            "cooldown": 1000000,
+            "expiration": 1000000,
+            "blockers": ["is_player_in_teamfight", "is_allied_base_collapsing"]
+        },
+        "champion_killed_matchup_advice": {
+            "first_cooldown": 0,
+            "cooldown": 120,
+            "expiration": 900,
+            "blockers": ["is_player_in_teamfight", "is_allied_base_collapsing", "is_player_champion_dead"]
+        },
+        "item_buy_advice": {
+            "first_cooldown": 0,
+            "cooldown": 120,
+            "expiration": 1000000,
+            "blockers": []
+        },
+        "jungler_tracking": {
+            "first_cooldown": 120,
+            "cooldown": 5,
+            "expiration": 1000000,
+            "blockers": ["is_player_in_teamfight", "is_player_champion_dead", "is_allied_base_collapsing"]
+        },
+        "dragon_next_spawn_alert": {
+            "first_cooldown": 180,
+            "cooldown": 180,
+            "expiration": 1000000,
+            "blockers": ["is_player_in_teamfight", "is_allied_base_collapsing"]
+        },
+        "baron_next_spawn_alert": {
+            "first_cooldown": 1200,
+            "cooldown": 180,
+            "expiration": 1000000,
+            "blockers": ["is_player_in_teamfight", "is_allied_base_collapsing"]
+        },
+        "herald_next_spawn_alert": {
+            "first_cooldown": 600,
+            "cooldown": 180,
+            "expiration": 1185,
+            "blockers": ["is_player_in_teamfight", "is_allied_base_collapsing"]
+        },
+        "dead_reminder": {
+            "first_cooldown": 0,
+            "cooldown": 5,
+            "expiration": 1000000,
+            "blockers": []
+        },
+        "base_reminder": {
+            "first_cooldown": 0,
+            "cooldown": 5,
+            "expiration": 1000000,
+            "blockers": []
+        },
+        "endgame_summary": {
+            "first_cooldown": 600,
+            "cooldown": 1000000,
+            "expiration": 1000000,
+            "blockers": []
+        }
+    },
+    "JUNGLE": {
+        "creepscore_alert": {
+            "first_cooldown": 270,
+            "cooldown": 420,
+            "expiration": 1000000,
+            "blockers": ["is_player_in_teamfight", "is_late_game", "is_allied_base_collapsing"]
+        },
+        "ward_score_alert": {
+            "first_cooldown": 0,
+            "cooldown": 300,
+            "expiration": 1000000,
+            "blockers": ["is_player_in_teamfight", "is_late_game", "is_allied_base_collapsing", "is_ward_absent_from_player_inventory"]
+        },
+        "back_alert": {
+            "first_cooldown": 0,
+            "cooldown": 60,
+            "expiration": 1000000,
+            "blockers": ["is_player_in_teamfight", "is_not_enough_gold_for_back"]
+        },
+        "global_strategic_advice": {
+            "first_cooldown": 300,
+            "cooldown": 300,
+            "expiration": 1000000,
+            "blockers": ["is_player_in_teamfight", "is_allied_base_collapsing"]
+        },
+        "death_advice": {
+            "first_cooldown": 0,
+            "cooldown": 210,
+            "expiration": 1000000,
+            "blockers": ["is_any_build_completed"]
+        },
+        "dragon_death_advice": {
+            "first_cooldown": 0,
+            "cooldown": 300,
+            "expiration": 1000000,
+            "blockers": ["is_player_in_teamfight", "is_last_objective_death_advice_recent", "is_allied_base_collapsing"]
+        },
+        "baron_death_advice": {
+            "first_cooldown": 1200,
+            "cooldown": 360,
+            "expiration": 1000000,
+            "blockers": ["is_player_in_teamfight"]
+        },
+        "herald_death_advice": {
+            "first_cooldown": 300,
+            "cooldown": 1000000,
+            "expiration": 1000000,
+            "blockers": ["is_player_in_teamfight"]
+        },
+        "first_turret_killed_on_toplane_advice": {
+            "first_cooldown": 0,
+            "cooldown": 1000000,
+            "expiration": 1000000,
+            "blockers": ["is_player_in_teamfight", "is_allied_base_collapsing"]
+        },
+        "first_turret_killed_on_midlane_advice": {
+            "first_cooldown": 0,
+            "cooldown": 1000000,
+            "expiration": 1000000,
+            "blockers": ["is_player_in_teamfight", "is_allied_base_collapsing"]
+        },
+        "first_turret_killed_on_botlane_advice": {
+            "first_cooldown": 0,
+            "cooldown": 1000000,
+            "expiration": 1000000,
+            "blockers": ["is_player_in_teamfight", "is_allied_base_collapsing"]
+        },
+        "champion_killed_matchup_advice": {
+            "first_cooldown": 0,
+            "cooldown": 120,
+            "expiration": 900,
+            "blockers": ["is_player_in_teamfight", "is_allied_base_collapsing", "is_player_champion_dead"]
+        },
+        "item_buy_advice": {
+            "first_cooldown": 0,
+            "cooldown": 120,
+            "expiration": 1000000,
+            "blockers": []
+        },
+        "dragon_next_spawn_alert": {
+            "first_cooldown": 180,
+            "cooldown": 180,
+            "expiration": 1000000,
+            "blockers": ["is_player_in_teamfight", "is_allied_base_collapsing"]
+        },
+        "baron_next_spawn_alert": {
+            "first_cooldown": 1200,
+            "cooldown": 180,
+            "expiration": 1000000,
+            "blockers": ["is_player_in_teamfight", "is_allied_base_collapsing"]
+        },
+        "herald_next_spawn_alert": {
+            "first_cooldown": 600,
+            "cooldown": 180,
+            "expiration": 1185,
+            "blockers": ["is_player_in_teamfight", "is_allied_base_collapsing"]
+        },
+        "dead_reminder": {
+            "first_cooldown": 0,
+            "cooldown": 5,
+            "expiration": 1000000,
+            "blockers": []
+        },
+        "base_reminder": {
+            "first_cooldown": 0,
+            "cooldown": 5,
+            "expiration": 1000000,
+            "blockers": []
+        },
+        "endgame_summary": {
+            "first_cooldown": 600,
+            "cooldown": 1000000,
+            "expiration": 1000000,
+            "blockers": []
+        }
+    },
+    "MIDDLE": {
+        "creepscore_alert": {
+            "first_cooldown": 270,
+            "cooldown": 600,
+            "expiration": 1000000,
+            "blockers": ["is_player_in_teamfight", "is_late_game", "is_allied_base_collapsing"]
+        },
+        "ward_score_alert": {
+            "first_cooldown": 0,
+            "cooldown": 300,
+            "expiration": 1000000,
+            "blockers": ["is_player_in_teamfight", "is_late_game", "is_allied_base_collapsing"]
+        },
+        "back_alert": {
+            "first_cooldown": 0,
+            "cooldown": 60,
+            "expiration": 1000000,
+            "blockers": ["is_player_in_teamfight", "is_not_enough_gold_for_back"]
+        },
+        "global_strategic_advice": {
+            "first_cooldown": 300,
+            "cooldown": 300,
+            "expiration": 1000000,
+            "blockers": ["is_player_in_teamfight", "is_allied_base_collapsing"]
+        },
+        "death_advice": {
+            "first_cooldown": 0,
+            "cooldown": 210,
+            "expiration": 1000000,
+            "blockers": ["is_any_build_completed"]
+        },
+        "dragon_death_advice": {
+            "first_cooldown": 0,
+            "cooldown": 300,
+            "expiration": 1000000,
+            "blockers": ["is_player_in_teamfight", "is_last_objective_death_advice_recent", "is_allied_base_collapsing"]
+        },
+        "baron_death_advice": {
+            "first_cooldown": 1200,
+            "cooldown": 360,
+            "expiration": 1000000,
+            "blockers": ["is_player_in_teamfight"]
+        },
+        "herald_death_advice": {
+            "first_cooldown": 300,
+            "cooldown": 1000000,
+            "expiration": 1000000,
+            "blockers": ["is_player_in_teamfight"]
+        },
+        "first_turret_killed_on_lane_advice": {
+            "first_cooldown": 0,
+            "cooldown": 1000000,
+            "expiration": 1000000,
+            "blockers": ["is_player_in_teamfight", "is_allied_base_collapsing"]
+        },
+        "first_turret_killed_on_botlane_advice": {
+            "first_cooldown": 0,
+            "cooldown": 1000000,
+            "expiration": 1000000,
+            "blockers": ["is_player_in_teamfight", "is_allied_base_collapsing"]
+        },
+        "champion_killed_matchup_advice": {
+            "first_cooldown": 0,
+            "cooldown": 120,
+            "expiration": 900,
+            "blockers": ["is_player_in_teamfight", "is_allied_base_collapsing", "is_player_champion_dead"]
+        },
+        "item_buy_advice": {
+            "first_cooldown": 0,
+            "cooldown": 120,
+            "expiration": 1000000,
+            "blockers": []
+        },
+        "jungler_tracking": {
+            "first_cooldown": 120,
+            "cooldown": 5,
+            "expiration": 1000000,
+            "blockers": ["is_player_in_teamfight", "is_player_champion_dead", "is_allied_base_collapsing"]
+        },
+        "dragon_next_spawn_alert": {
+            "first_cooldown": 180,
+            "cooldown": 180,
+            "expiration": 1000000,
+            "blockers": ["is_player_in_teamfight", "is_allied_base_collapsing"]
+        },
+        "baron_next_spawn_alert": {
+            "first_cooldown": 1200,
+            "cooldown": 180,
+            "expiration": 1000000,
+            "blockers": ["is_player_in_teamfight", "is_allied_base_collapsing"]
+        },
+        "herald_next_spawn_alert": {
+            "first_cooldown": 600,
+            "cooldown": 180,
+            "expiration": 1185,
+            "blockers": ["is_player_in_teamfight", "is_allied_base_collapsing"]
+        },
+        "dead_reminder": {
+            "first_cooldown": 0,
+            "cooldown": 5,
+            "expiration": 1000000,
+            "blockers": []
+        },
+        "base_reminder": {
+            "first_cooldown": 0,
+            "cooldown": 5,
+            "expiration": 1000000,
+            "blockers": []
+        },
+        "endgame_summary": {
+            "first_cooldown": 600,
+            "cooldown": 1000000,
+            "expiration": 1000000,
+            "blockers": []
+        }
+    },
+    "BOTTOM": {
+        "creepscore_alert": {
+            "first_cooldown": 270,
+            "cooldown": 420,
+            "expiration": 1000000,
+            "blockers": ["is_player_in_teamfight", "is_late_game", "is_allied_base_collapsing"]
+        },
+        "ward_score_alert": {
+            "first_cooldown": 0,
+            "cooldown": 450,
+            "expiration": 1000000,
+            "blockers": ["is_player_in_teamfight", "is_late_game", "is_allied_base_collapsing"]
+        },
+        "back_alert": {
+            "first_cooldown": 0,
+            "cooldown": 60,
+            "expiration": 1000000,
+            "blockers": ["is_player_in_teamfight", "is_not_enough_gold_for_back"]
+        },
+        "global_strategic_advice": {
+            "first_cooldown": 300,
+            "cooldown": 300,
+            "expiration": 1000000,
+            "blockers": ["is_player_in_teamfight", "is_allied_base_collapsing"]
+        },
+        "death_advice": {
+            "first_cooldown": 0,
+            "cooldown": 210,
+            "expiration": 1000000,
+            "blockers": ["is_any_build_completed"]
+        },
+        "dragon_death_advice": {
+            "first_cooldown": 0,
+            "cooldown": 300,
+            "expiration": 1000000,
+            "blockers": ["is_player_in_teamfight", "is_last_objective_death_advice_recent", "is_allied_base_collapsing"]
+        },
+        "baron_death_advice": {
+            "first_cooldown": 1200,
+            "cooldown": 360,
+            "expiration": 1000000,
+            "blockers": ["is_player_in_teamfight"]
+        },
+        "herald_death_advice": {
+            "first_cooldown": 300,
+            "cooldown": 1000000,
+            "expiration": 1000000,
+            "blockers": ["is_player_in_teamfight"]
+        },
+        "first_turret_killed_on_lane_advice": {
+            "first_cooldown": 0,
+            "cooldown": 1000000,
+            "expiration": 1000000,
+            "blockers": ["is_player_in_teamfight", "is_allied_base_collapsing"]
+        },
+        "champion_killed_matchup_advice": {
+            "first_cooldown": 0,
+            "cooldown": 120,
+            "expiration": 900,
+            "blockers": ["is_player_in_teamfight", "is_allied_base_collapsing", "is_player_champion_dead"]
+        },
+        "item_buy_advice": {
+            "first_cooldown": 0,
+            "cooldown": 120,
+            "expiration": 1000000,
+            "blockers": []
+        },
+        "jungler_tracking": {
+            "first_cooldown": 120,
+            "cooldown": 5,
+            "expiration": 1000000,
+            "blockers": ["is_player_in_teamfight", "is_player_champion_dead", "is_allied_base_collapsing"]
+        },
+        "dragon_next_spawn_alert": {
+            "first_cooldown": 180,
+            "cooldown": 180,
+            "expiration": 1000000,
+            "blockers": ["is_player_in_teamfight", "is_allied_base_collapsing"]
+        },
+        "baron_next_spawn_alert": {
+            "first_cooldown": 1200,
+            "cooldown": 180,
+            "expiration": 1000000,
+            "blockers": ["is_player_in_teamfight", "is_allied_base_collapsing"]
+        },
+        "herald_next_spawn_alert": {
+            "first_cooldown": 600,
+            "cooldown": 180,
+            "expiration": 1185,
+            "blockers": ["is_player_in_teamfight", "is_allied_base_collapsing"]
+        },
+        "dead_reminder": {
+            "first_cooldown": 0,
+            "cooldown": 5,
+            "expiration": 1000000,
+            "blockers": []
+        },
+        "base_reminder": {
+            "first_cooldown": 0,
+            "cooldown": 5,
+            "expiration": 1000000,
+            "blockers": []
+        },
+        "endgame_summary": {
+            "first_cooldown": 600,
+            "cooldown": 1000000,
+            "expiration": 1000000,
+            "blockers": []
+        }
+    },
+    "UTILITY": {
+        "ward_score_alert": {
+            "first_cooldown": 0,
+            "cooldown": 450,
+            "expiration": 1000000,
+            "blockers": ["is_player_in_teamfight", "is_late_game", "is_allied_base_collapsing"]
+        },
+        "back_alert": {
+            "first_cooldown": 0,
+            "cooldown": 60,
+            "expiration": 1000000,
+            "blockers": ["is_player_in_teamfight", "is_not_enough_gold_for_back"]
+        },
+        "global_strategic_advice": {
+            "first_cooldown": 300,
+            "cooldown": 300,
+            "expiration": 1000000,
+            "blockers": ["is_player_in_teamfight", "is_allied_base_collapsing"]
+        },
+        "death_advice": {
+            "first_cooldown": 0,
+            "cooldown": 210,
+            "expiration": 1000000,
+            "blockers": ["is_any_build_completed"]
+        },
+        "dragon_death_advice": {
+            "first_cooldown": 0,
+            "cooldown": 300,
+            "expiration": 1000000,
+            "blockers": ["is_player_in_teamfight", "is_last_objective_death_advice_recent", "is_allied_base_collapsing"]
+        },
+        "baron_death_advice": {
+            "first_cooldown": 1200,
+            "cooldown": 360,
+            "expiration": 1000000,
+            "blockers": ["is_player_in_teamfight"]
+        },
+        "herald_death_advice": {
+            "first_cooldown": 300,
+            "cooldown": 1000000,
+            "expiration": 1000000,
+            "blockers": ["is_player_in_teamfight"]
+        },
+        "first_turret_killed_on_lane_advice": {
+            "first_cooldown": 0,
+            "cooldown": 1000000,
+            "expiration": 1000000,
+            "blockers": ["is_player_in_teamfight", "is_allied_base_collapsing"]
+        },
+        "champion_killed_matchup_advice": {
+            "first_cooldown": 0,
+            "cooldown": 120,
+            "expiration": 900,
+            "blockers": ["is_player_in_teamfight", "is_allied_base_collapsing", "is_player_champion_dead"]
+        },
+        "item_buy_advice": {
+            "first_cooldown": 0,
+            "cooldown": 120,
+            "expiration": 1000000,
+            "blockers": []
+        },
+        "jungler_tracking": {
+            "first_cooldown": 120,
+            "cooldown": 5,
+            "expiration": 1000000,
+            "blockers": ["is_player_in_teamfight", "is_player_champion_dead", "is_allied_base_collapsing"]
+        },
+        "dragon_next_spawn_alert": {
+            "first_cooldown": 180,
+            "cooldown": 180,
+            "expiration": 1000000,
+            "blockers": ["is_player_in_teamfight", "is_allied_base_collapsing"]
+        },
+        "baron_next_spawn_alert": {
+            "first_cooldown": 1200,
+            "cooldown": 180,
+            "expiration": 1000000,
+            "blockers": ["is_player_in_teamfight", "is_allied_base_collapsing"]
+        },
+        "herald_next_spawn_alert": {
+            "first_cooldown": 600,
+            "cooldown": 180,
+            "expiration": 1185,
+            "blockers": ["is_player_in_teamfight", "is_allied_base_collapsing"]
+        },
+        "dead_reminder": {
+            "first_cooldown": 0,
+            "cooldown": 5,
+            "expiration": 1000000,
+            "blockers": []
+        },
+        "base_reminder": {
+            "first_cooldown": 0,
+            "cooldown": 5,
+            "expiration": 1000000,
+            "blockers": []
+        },
+        "endgame_summary": {
+            "first_cooldown": 600,
+            "cooldown": 1000000,
+            "expiration": 1000000,
+            "blockers": []
+        }
+    }
+}

@@ -1,0 +1,38 @@
+# AMOKK Backend — Dépendances Python
+# Python 3.11+
+
+# Serveur web
+fastapi==0.111.0
+uvicorn[standard]==0.30.1
+pydantic==2.7.1
+
+# HTTP client (proxy vers api.amokk.fr)
+aiohttp==3.9.5
+
+# Computer Vision
+torch==2.3.0
+torchvision==0.18.0
+opencv-python==4.9.0.80
+numpy==1.26.4
+Pillow==10.3.0
+shapely==2.0.4
+
+# Capture écran DirectX (Windows uniquement)
+dxcam==0.0.5
+
+# IA — Anthropic Claude (remplace OpenAI GPT)
+anthropic>=0.25.0
+
+# TTS — Google Text-to-Speech (gTTS, gratuit, supporte le français, remplace OpenAI TTS)
+gTTS>=2.5.0
+
+# Lecture audio MP3 (compatible Python 3.14+, remplace pygame)
+playsound==1.2.2
+
+# Audio (optionnel)
+sounddevice>=0.4.6
+pydub>=0.25.1
+
+# Utilitaires
+python-dotenv==1.0.1
+psutil==5.9.8
