@@ -230,6 +230,25 @@ class Assistant:
             logger.error("Claude API error: %s", e)
             return _get_fallback_advice(trigger_type, context)
 
+    def get_usage(self) -> dict:
+        inp   = self._usage['anthropic_input_tokens']
+        out   = self._usage['anthropic_output_tokens']
+        chars = self._usage['openai_tts_chars']
+        anthropic_cost = (inp * 1.00 + out * 5.00) / 1_000_000
+        openai_cost    = chars * 15.00 / 1_000_000
+        return {
+            'anthropic': {
+                'input_tokens':  inp,
+                'output_tokens': out,
+                'cost_usd':      round(anthropic_cost, 4),
+            },
+            'openai_tts': {
+                'chars':    chars,
+                'cost_usd': round(openai_cost, 4),
+            },
+            'total_cost_usd': round(anthropic_cost + openai_cost, 4),
+        }
+
 
 def _build_prompt(trigger_type: str, ctx: dict) -> str:
     """Construit le prompt selon le type de trigger"""
@@ -316,27 +335,6 @@ def _get_fallback_advice(trigger_type: str, ctx: dict) -> str:
         "jungler_tracking": "Fais attention au jungler adverse, il pourrait tenter un gank. Warde ta voie.",
     }
     return fallbacks.get(trigger_type, "Continue à jouer proprement.")
-
-
-    def get_usage(self) -> dict:
-        inp = self._usage['anthropic_input_tokens']
-        out = self._usage['anthropic_output_tokens']
-        chars = self._usage['openai_tts_chars']
-        # Pricing estimates (per-token/per-char)
-        anthropic_cost = (inp * 1.00 + out * 5.00) / 1_000_000
-        openai_cost    = chars * 15.00 / 1_000_000
-        return {
-            'anthropic': {
-                'input_tokens':  inp,
-                'output_tokens': out,
-                'cost_usd':      round(anthropic_cost, 4),
-            },
-            'openai_tts': {
-                'chars':    chars,
-                'cost_usd': round(openai_cost, 4),
-            },
-            'total_cost_usd': round(anthropic_cost + openai_cost, 4),
-        }
 
 
 # Singleton
