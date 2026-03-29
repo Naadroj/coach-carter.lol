@@ -2,7 +2,8 @@
  * Coach Carter LoL — Electron Main Process
  */
 import { app, BrowserWindow, ipcMain, shell } from 'electron'
-import { autoUpdater } from 'electron-updater'
+import electronUpdater from 'electron-updater'
+const { autoUpdater } = electronUpdater
 import { spawn, ChildProcess } from 'child_process'
 import path from 'path'
 import fs from 'fs'
