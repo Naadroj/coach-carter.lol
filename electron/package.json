@@ -2,6 +2,7 @@
   "name": "coach-carter-lol",
   "version": "1.0.0",
   "description": "Coach Carter LoL - AI Voice Coach for League of Legends",
+  "author": "Naadroj",
   "main": "dist-electron/main.js",
   "type": "module",
   "scripts": {
@@ -42,7 +43,7 @@
     },
     "publish": {
       "provider": "github",
-      "owner":    "OWNER_PLACEHOLDER",
+      "owner":    "Naadroj",
       "repo":     "coach-carter.lol"
     }
   }
