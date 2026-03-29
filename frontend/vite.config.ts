@@ -22,7 +22,7 @@ export default defineConfig({
     },
   },
   build: {
-    outDir: '../electron/resources/dist',
+    outDir: 'dist',
     emptyOutDir: true,
   },
 })
