@@ -40,9 +40,10 @@ interface TriggerConfig {
 }
 
 export default function Settings() {
-  const [triggers, setTriggers] = useState<TriggerConfig[]>([])
-  const [saving, setSaving]     = useState<string | null>(null)
-  const [saved, setSaved]       = useState<string | null>(null)
+  const [triggers, setTriggers]           = useState<TriggerConfig[]>([])
+  const [backendError, setBackendError]   = useState(false)
+  const [saving, setSaving]               = useState<string | null>(null)
+  const [saved, setSaved]                 = useState<string | null>(null)
   const [maskedKeys, setMaskedKeys]     = useState<{ anthropicKey: string; openaiKey: string } | null>(null)
   const [editingKeys, setEditingKeys]   = useState(false)
   const [newAnthKey, setNewAnthKey]     = useState('')
@@ -52,8 +53,8 @@ export default function Settings() {
 
   useEffect(() => {
     api.get<{ triggers: TriggerConfig[] }>('/triggers/config')
-      .then(d => setTriggers(d.triggers))
-      .catch(() => {})
+      .then(d => { setTriggers(d.triggers); setBackendError(false) })
+      .catch(() => setBackendError(true))
   }, [])
 
   useEffect(() => {
@@ -120,6 +121,12 @@ export default function Settings() {
         <h1>Paramètres du coaching</h1>
         <p className={styles.subtitle}>Activez ou désactivez chaque alerte et ajustez leur fréquence.</p>
       </div>
+
+      {backendError && (
+        <div style={{ background: '#2a1a1a', border: '1px solid #c0392b', borderRadius: '8px', padding: '12px 16px', marginBottom: '16px', color: '#e74c3c', fontSize: '13px' }}>
+          ⚠️ Le backend ne répond pas. Vérifie que le backend Python tourne bien sur le port 8000.
+        </div>
+      )}
 
       {/* ── Triggers classiques ── */}
       <div className={styles.card}>
