@@ -1,33 +1,28 @@
 @echo off
-title AMOKK Local - Lancement
+title Coach Carter LoL - Lancement
 
 echo ========================================
-echo  AMOKK - AI Voice Coach for LoL (Local)
+echo  Coach Carter LoL - Demarrage
 echo ========================================
 echo.
-
-:: Verifier .env
-if not exist "backend\.env" (
-    echo [WARN] Fichier backend\.env manquant
-    echo        Copie backend\.env.example vers backend\.env et remplis OPENAI_API_KEY
-    echo.
-)
 
 :: Lancer le backend Python dans une fenetre separee
 echo [1/2] Demarrage du backend Python...
-start "AMOKK Backend" cmd /k "cd backend && python main.py"
+start "Coach Carter Backend" cmd /k "cd /d "%~dp0backend" && python main.py"
 
 :: Attendre que le backend soit pret
-timeout /t 3 /nobreak > nul
+echo [2/2] Attente du backend (5s)...
+timeout /t 5 /nobreak > nul
 
-:: Lancer le frontend Vite (mode dev)
-echo [2/2] Demarrage du frontend...
-start "AMOKK Frontend" cmd /k "cd frontend && npm run dev"
+:: Lancer l'app Electron
+echo [3/3] Lancement de l'application...
+start "" "%~dp0electron\dist\win-unpacked\Coach Carter LoL.exe"
 
 echo.
-echo AMOKK demarre !
+echo Coach Carter LoL demarre !
 echo   Backend : http://127.0.0.1:8000
-echo   Frontend: http://localhost:5173
 echo.
-echo (Ferme les fenetres pour tout arreter)
+echo Laisse cette fenetre ouverte pour garder le backend actif.
+echo Ferme-la pour arreter le backend.
+echo.
 pause

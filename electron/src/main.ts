@@ -56,6 +56,12 @@ function getBackendPath(): string {
 }
 
 async function startBackend(): Promise<void> {
+  // Si le backend tourne déjà (lancé via bat), on ne le redémarre pas
+  try {
+    const res = await fetch(`${BACKEND_URL}/status`)
+    if (res.ok) { console.log('[ELECTRON] Backend already running'); return }
+  } catch {}
+
   const backendPath = getBackendPath()
   console.log('[ELECTRON] Starting backend:', backendPath)
   setSplashStatus('Démarrage du backend...')
