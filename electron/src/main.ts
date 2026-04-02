@@ -18,9 +18,9 @@ const BACKEND_PORT = 8000
 const BACKEND_HOST = '127.0.0.1'
 const BACKEND_URL  = `http://${BACKEND_HOST}:${BACKEND_PORT}`
 
-let mainWindow:   BrowserWindow | null = null
-let splashWindow: BrowserWindow | null = null
-let pythonProcess: ChildProcess | null = null
+let mainWindow:    BrowserWindow | null = null
+let splashWindow:  BrowserWindow | null = null
+let pythonProcess: ChildProcess  | null = null
 
 // ── Splash ────────────────────────────────────────────────────────────────
 
@@ -34,9 +34,9 @@ function createSplash(): void {
     backgroundColor: '#0a0e1a',
     webPreferences: { nodeIntegration: true, contextIsolation: false },
   })
-  const splashPath = isDev
-    ? path.join(__dirname, '..', 'splash.html')
-    : path.join(__dirname, '..', '..', 'splash.html')
+  // Dev:  dist-electron/../splash.html  = electron/splash.html
+  // Prod: app.asar/dist-electron/../splash.html = app.asar/splash.html
+  const splashPath = path.join(__dirname, '..', 'splash.html')
   splashWindow.loadFile(splashPath)
 }
 
@@ -61,8 +61,7 @@ async function startBackend(): Promise<void> {
   setSplashStatus('Démarrage du backend...')
 
   const isExe = !backendPath.endsWith('.py')
-  const cmd   = isExe ? backendPath : 'python'
-  const args  = isExe ? [] : [backendPath]
+  const cwd   = path.dirname(backendPath)
 
   const env: NodeJS.ProcessEnv = {
     ...process.env,
@@ -73,15 +72,30 @@ async function startBackend(): Promise<void> {
     OPENAI_API_KEY:    store.get('openaiKey')    || process.env.OPENAI_API_KEY    || '',
   }
 
-  pythonProcess = spawn(cmd, args, {
-    env,
-    stdio: ['ignore', 'pipe', 'pipe'],
-    cwd: path.dirname(backendPath),
-  })
+  if (isExe) {
+    pythonProcess = spawn(backendPath, [], { env, stdio: ['ignore', 'pipe', 'pipe'], cwd })
+  } else {
+    // Sur Windows essayer py (launcher), python, python3
+    for (const cmd of ['py', 'python', 'python3']) {
+      try {
+        const proc = spawn(cmd, [backendPath], { env, stdio: ['ignore', 'pipe', 'pipe'], cwd })
+        await new Promise<void>((resolve, reject) => {
+          proc.once('error', reject)
+          proc.once('spawn', resolve)
+        })
+        pythonProcess = proc
+        console.log('[ELECTRON] Python cmd used:', cmd)
+        break
+      } catch {
+        console.warn('[ELECTRON] Python cmd not found:', cmd)
+      }
+    }
+    if (!pythonProcess) console.error('[ELECTRON] No Python interpreter found!')
+  }
 
-  pythonProcess.stdout?.on('data', d => console.log('[BACKEND]', d.toString().trim()))
-  pythonProcess.stderr?.on('data', d => console.error('[BACKEND ERR]', d.toString().trim()))
-  pythonProcess.on('exit', code => console.log('[BACKEND] exited:', code))
+  pythonProcess?.stdout?.on('data', d => console.log('[BACKEND]', d.toString().trim()))
+  pythonProcess?.stderr?.on('data', d => console.error('[BACKEND ERR]', d.toString().trim()))
+  pythonProcess?.on('exit', code => console.log('[BACKEND] exited:', code))
 
   setSplashStatus('En attente du backend...')
   await waitForBackend()
